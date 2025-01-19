@@ -1,0 +1,38 @@
+<resources>
+    <string name="app_name">ProyectoAppFinanzas</string>
+    <string name="info_kakebo"><![CDATA[
+        <b>¿Qué es Kakebo?</b><br/>
+        Kakebo, que se traduce como "libro de cuentas del hogar", es un método que te ayuda a registrar y reflexionar sobre tus gastos e ingresos. La idea es que, al escribir tus transacciones, te vuelvas más consciente de tus hábitos de consumo y, por lo tanto, puedas gestionar mejor tu dinero.<br/><br/>
+
+        <b>¿Cómo funciona el método Kakebo?</b><br/>
+        <b>Registro de Ingresos:</b><br/>
+        Al inicio de cada mes, anota todos tus ingresos. Esto incluye tu salario, ingresos adicionales, y cualquier otra fuente de dinero que recibas. Tener una visión clara de tus ingresos es fundamental para planificar tus gastos.<br/><br/>
+
+        <b>Clasificación de Gastos:</b><br/>
+        Divide tus gastos en categorías. Las categorías comunes incluyen:<br/>
+        - Necesidades: Gastos esenciales como alquiler, comida, transporte, etc.<br/>
+        - Deseos: Gastos no esenciales como entretenimiento, cenas fuera, etc.<br/>
+        - Ahorro: Cantidad que deseas ahorrar cada mes.<br/>
+        - Deudas: Pagos de préstamos o tarjetas de crédito.<br/>
+        Al clasificar tus gastos, puedes identificar áreas donde podrías reducir gastos innecesarios.<br/><br/>
+
+        <b>Registro Diario:</b><br/>
+        Cada día, anota todos tus gastos. Esto puede ser tan simple como escribir en un cuaderno o utilizar nuestra app para registrar tus transacciones. La clave es ser honesto y registrar todo, incluso los pequeños gastos.<br/><br/>
+
+        <b>Reflexión Semanal:</b><br/>
+        Al final de cada semana, revisa tus gastos. Pregúntate:<br/>
+        - ¿He gastado más de lo que planeaba?<br/>
+        - ¿Hay alguna categoría donde estoy gastando demasiado?<br/>
+        - ¿Puedo ajustar mis gastos para la próxima semana?<br/>
+        Esta reflexión te ayudará a ser más consciente de tus hábitos de consumo.<br/><br/>
+
+        <b>Análisis Mensual:</b><br/>
+        Al final del mes, haz un balance. Suma tus ingresos y gastos, y calcula cuánto has ahorrado. Compara tus gastos con tus objetivos de ahorro. Pregúntate:<br/>
+        - ¿He cumplido con mis metas de ahorro?<br/>
+        - ¿Qué cambios puedo hacer para el próximo mes?<br/>
+        Este análisis te permitirá ajustar tu presupuesto y mejorar tu gestión financiera.<br/><br/>
+
+        <b>Establecimiento de Metas:</b><br/>
+        Con base en tu análisis mensual, establece metas para el próximo mes. Esto puede incluir aumentar tu ahorro, reducir gastos en ciertas categorías, o incluso planificar para un gasto grande que se avecina.
+    ]]></string>
+</resources>
