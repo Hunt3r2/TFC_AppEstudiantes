@@ -1,6 +1,7 @@
 package com.example.proyectoappfinanzas
 
 import BaseDatosKakebo
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.text.Html
@@ -16,8 +17,10 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
+
 class KakeboActivity : AppCompatActivity() {
     private lateinit var dbHelper: BaseDatosKakebo
+    @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -27,6 +30,7 @@ class KakeboActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
 
         val volverAtras: FloatingActionButton = findViewById(R.id.volver_atras)
 
@@ -56,45 +60,62 @@ class KakeboActivity : AppCompatActivity() {
         val categorias = arrayOf("Salario", "Regalo", "Freelance", "Inversión")
         spinnerCategoria = findViewById(R.id.spinnerCategoria)
 
+        lateinit var spinnerCategoriaGasto: Spinner
+        spinnerCategoriaGasto = findViewById(R.id.spinnerCategoriaGasto)
+
         // Configurar el adaptador para el Spinner
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, categorias)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerCategoria.adapter = adapter
+        spinnerCategoriaGasto.adapter = adapter
 
         val btnMostrarIngresos: Button = findViewById(R.id.boton_mostrarIngresos)
         btnMostrarIngresos.setOnClickListener {
             mostrarIngresos()
         }
 
+        val btnMostrarGastos: Button = findViewById(R.id.boton_mostrarGastos)
+        btnMostrarGastos.setOnClickListener {
+            mostrarGastos()
+        }
+
         dbHelper = BaseDatosKakebo(this)
         val editTextMonto: EditText = findViewById(R.id.dineroIngresado)
         val editTextDescripcion: EditText = findViewById(R.id.descIngreso)
-        val btnGuardar: Button = findViewById(R.id.boton_guardarIngresos)
+        val editTextMontoGasto: EditText = findViewById(R.id.dineroGastado)
+        val editTextDescripcionGasto: EditText = findViewById(R.id.descGasto)
+        val btnGuardarTodo: Button = findViewById(R.id.boton_guardar)
 
-        btnGuardar.setOnClickListener {
-            val monto = editTextMonto.text.toString().toDoubleOrNull()
-            val descripcion = editTextDescripcion.text.toString()
-            val categoria = spinnerCategoria.selectedItem.toString()
+        btnGuardarTodo.setOnClickListener {
+//            // Guardar ingreso
+            val montoIngreso = editTextMonto.text.toString().toDoubleOrNull()
+            val descripcionIngreso = editTextDescripcion.text.toString()
+            val categoriaIngreso = spinnerCategoria.selectedItem.toString()
 
-            if (monto != null) {
-                // Llamar al método para agregar ingreso
-                dbHelper.agregarIngreso(monto, descripcion, categoria)
+            if (montoIngreso != null) {
+                dbHelper.agregarIngreso(montoIngreso, descripcionIngreso, categoriaIngreso)
                 Toast.makeText(this, "Ingreso guardado", Toast.LENGTH_SHORT).show()
             } else {
-                Toast.makeText(this, "Por favor, ingrese un monto válido", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Por favor, ingrese un monto válido para el ingreso", Toast.LENGTH_SHORT).show()
             }
-        }
 
-        val listaIngresos = dbHelper.obtenerIngresos()
-        for (ingreso in listaIngresos) {
-            // Aquí puedes mostrar los ingresos en la UI, por ejemplo, en un RecyclerView
-            println("Ingreso: ${ingreso.descripcion}, Monto: ${ingreso.monto}, Categoría: ${ingreso.categoria}")
+            // Guardar gasto
+            val montoGasto = editTextMontoGasto.text.toString().toDoubleOrNull()
+            val descripcionGasto = editTextDescripcionGasto.text.toString()
+            val categoriaGasto = spinnerCategoriaGasto.selectedItem.toString()
+
+            if (montoGasto != null) {
+                dbHelper.agregarGasto(montoGasto, descripcionGasto, categoriaGasto)
+                Toast.makeText(this, "Gasto guardado", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "Por favor, ingrese un monto válido para el gasto", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
     private fun mostrarIngresos() {
         val listaIngresos = dbHelper.obtenerIngresos()
-        val ingresosTexto = listaIngresos.map { "ID: ${it.id}, Descripción: ${it.descripcion}, Monto: ${it.monto}, Categoría: ${it.categoria}" }.toTypedArray()
+        val ingresosTexto = listaIngresos.map { "\nDescripción: ${it.descripcion}, \nMonto: ${it.monto}, \nCategoría: ${it.categoria} \n-------------" }.toTypedArray()
 
         // Crear el AlertDialog con una lista de ingresos
         val builder = AlertDialog.Builder(this)
@@ -110,5 +131,37 @@ class KakeboActivity : AppCompatActivity() {
         // Mostrar el AlertDialog
         builder.create().show()
     }
+
+    fun calcularTotalesPorCategoria(gastos: List<Modelos.Gasto>): Map<String, Float> {
+        val totales = mutableMapOf<String, Float>()
+
+        for (gasto in gastos) {
+            totales[gasto.categoria] = (totales.getOrDefault(gasto.categoria, 0f) + gasto.monto).toFloat()
+        }
+
+        return totales
+    }
+
+    private fun mostrarGastos() {
+        val listaGastos = dbHelper.obtenerGastos()
+        val gastosTexto = listaGastos.map { "\nDescripción: ${it.descripcion}, \nMonto: ${it.monto}, \nCategoría: ${it.categoria} \n-------------" }.toTypedArray()
+
+        // Crear el AlertDialog con una lista de ingresos
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Lista de gastos")
+        builder.setItems(gastosTexto) { dialog, which ->
+            // Eliminar el ingreso seleccionado
+            val gastoSeleccionado = listaGastos[which]
+            dbHelper.borrarIngreso(gastoSeleccionado.id)
+            Toast.makeText(this, "Gasto eliminado: ${gastoSeleccionado.descripcion}", Toast.LENGTH_SHORT).show()
+        }
+        builder.setNegativeButton("Cancelar") { dialog, _ -> dialog.dismiss() }
+
+        // Mostrar el AlertDialog
+        builder.create().show()
+    }
+
+
+
 
 }
