@@ -1,24 +1,20 @@
 pluginManagement {
     repositories {
-        google {
-            content {
-                includeGroupByRegex("com\\.android.*")
-                includeGroupByRegex("com\\.google.*")
-                includeGroupByRegex("androidx.*")
-            }
-        }
+        google()
         mavenCentral()
-        gradlePluginPortal()
+        maven { url = uri("https://jitpack.io") }
+        maven { url = uri("https://maven.mongodb.com/releases") } // Repositorio de MongoDB
     }
 }
+
 dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
         mavenCentral()
+        maven { url = uri("https://jitpack.io") }
+        maven { url = uri("https://maven.mongodb.com/releases") } // Repositorio de MongoDB
     }
 }
 
 rootProject.name = "ProyectoAppFinanzas"
-include(":app")
- 
+include(":app") // Asegúrate de incluir tus módulos aquí

@@ -2,9 +2,12 @@ package com.example.proyectoappfinanzas
 
 import BaseDatosKakebo
 import android.annotation.SuppressLint
+import android.app.DatePickerDialog
 import android.content.Intent
 import android.os.Bundle
 import android.text.Html
+import android.view.View
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
@@ -16,10 +19,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import java.util.Calendar
 
 
 class KakeboActivity : AppCompatActivity() {
     private lateinit var dbHelper: BaseDatosKakebo
+    private var mesSeleccionado: Int = 0
+    private var anioSeleccionado: Int = 0
+
+
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,7 +38,6 @@ class KakeboActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-
 
         val volverAtras: FloatingActionButton = findViewById(R.id.volver_atras)
 
@@ -87,13 +94,19 @@ class KakeboActivity : AppCompatActivity() {
         val btnGuardarTodo: Button = findViewById(R.id.boton_guardar)
 
         btnGuardarTodo.setOnClickListener {
-//            // Guardar ingreso
+            // Validar si se ha seleccionado un mes y un año
+            if (mesSeleccionado == 0 || anioSeleccionado == 0) {
+                Toast.makeText(this, "Por favor, seleccione un mes y un año.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            // Guardar ingreso
             val montoIngreso = editTextMonto.text.toString().toDoubleOrNull()
             val descripcionIngreso = editTextDescripcion.text.toString()
             val categoriaIngreso = spinnerCategoria.selectedItem.toString()
 
             if (montoIngreso != null) {
-                dbHelper.agregarIngreso(montoIngreso, descripcionIngreso, categoriaIngreso)
+                dbHelper.agregarIngreso(montoIngreso, descripcionIngreso, categoriaIngreso, mesSeleccionado, anioSeleccionado)  // Añadir el año aquí
                 Toast.makeText(this, "Ingreso guardado", Toast.LENGTH_SHORT).show()
             } else {
                 Toast.makeText(this, "Por favor, ingrese un monto válido para el ingreso", Toast.LENGTH_SHORT).show()
@@ -105,32 +118,86 @@ class KakeboActivity : AppCompatActivity() {
             val categoriaGasto = spinnerCategoriaGasto.selectedItem.toString()
 
             if (montoGasto != null) {
-                dbHelper.agregarGasto(montoGasto, descripcionGasto, categoriaGasto)
+                dbHelper.agregarGasto(montoGasto, descripcionGasto, categoriaGasto, mesSeleccionado, anioSeleccionado)  // Añadir el año aquí
                 Toast.makeText(this, "Gasto guardado", Toast.LENGTH_SHORT).show()
             } else {
                 Toast.makeText(this, "Por favor, ingrese un monto válido para el gasto", Toast.LENGTH_SHORT).show()
             }
         }
+
+        val btnSeleccionarFecha: Button = findViewById(R.id.btnSeleccionarFecha)
+
+        btnSeleccionarFecha.setOnClickListener {
+            val calendar = Calendar.getInstance()
+            val year = calendar.get(Calendar.YEAR)
+            val month = calendar.get(Calendar.MONTH) // Mes en base 0 (Enero es 0, Febrero es 1, etc.)
+
+            val datePickerDialog = DatePickerDialog(this, DatePickerDialog.OnDateSetListener { _, selectedYear, selectedMonth, _ ->
+                // Al seleccionar una fecha, guarda el año y el mes
+                anioSeleccionado = selectedYear
+                mesSeleccionado = selectedMonth + 1 // Ajustar para que Enero sea 1, Febrero sea 2, etc.
+                Toast.makeText(this, "Fecha seleccionada: $selectedMonth/$selectedYear", Toast.LENGTH_SHORT).show()
+            }, year, month, 1) // El "1" es el día predeterminado (1 de cada mes)
+
+            datePickerDialog.show()
+        }
+
+
     }
 
     private fun mostrarIngresos() {
-        val listaIngresos = dbHelper.obtenerIngresos()
-        val ingresosTexto = listaIngresos.map { "\nDescripción: ${it.descripcion}, \nMonto: ${it.monto}, \nCategoría: ${it.categoria} \n-------------" }.toTypedArray()
+        // Pedir al usuario que seleccione un mes
+        val meses = arrayOf("Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre")
 
-        // Crear el AlertDialog con una lista de ingresos
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle("Lista de Ingresos")
-        builder.setItems(ingresosTexto) { dialog, which ->
-            // Eliminar el ingreso seleccionado
-            val ingresoSeleccionado = listaIngresos[which]
-            dbHelper.borrarIngreso(ingresoSeleccionado.id)
-            Toast.makeText(this, "Ingreso eliminado: ${ingresoSeleccionado.descripcion}", Toast.LENGTH_SHORT).show()
+        // Crear el AlertDialog para seleccionar un mes
+        val builderMes = AlertDialog.Builder(this)
+        builderMes.setTitle("Selecciona un mes")
+        builderMes.setItems(meses) { dialog, which ->
+            // Establecer el mes seleccionado
+            mesSeleccionado = which + 1  // Ajustar índice para que Enero sea 1, Febrero 2, etc.
+
+            // Ahora, pedir al usuario que seleccione un año
+            val anios = arrayOf("2023", "2024", "2025", "2026") // Puedes agregar más años según tus necesidades
+
+            val builderAnio = AlertDialog.Builder(this)
+            builderAnio.setTitle("Selecciona un año")
+            builderAnio.setItems(anios) { _, which ->
+                // Establecer el año seleccionado
+                anioSeleccionado = anios[which].toInt()  // Asignamos el valor del año seleccionado a la variable anioSeleccionado
+
+                // Mostrar los ingresos para el mes y año seleccionados
+                val listaIngresos = dbHelper.obtenerIngresosPorMesYAnio(mesSeleccionado, anioSeleccionado)
+
+                if (listaIngresos.isEmpty()) {
+                    Toast.makeText(this, "No hay ingresos para el mes y año seleccionados.", Toast.LENGTH_SHORT).show()
+                } else {
+                    // Mostrar los ingresos en un AlertDialog
+                    val ingresosTexto = listaIngresos.map { "\nDescripción: ${it.descripcion}, \nMonto: ${it.monto}, \nCategoría: ${it.categoria}, \nMes: ${meses[it.mes - 1]}, \nAño: ${it.anio}\n-------------" }.toTypedArray()
+
+                    // Crear el AlertDialog con una lista de ingresos
+                    val ingresosDialogBuilder = AlertDialog.Builder(this)
+                    ingresosDialogBuilder.setTitle("Lista de ingresos de ${meses[mesSeleccionado - 1]} ${anioSeleccionado}")
+                    ingresosDialogBuilder.setItems(ingresosTexto) { dialog, which ->
+                        // Eliminar el ingreso seleccionado
+                        val ingresoSeleccionado = listaIngresos[which]
+                        dbHelper.borrarIngreso(ingresoSeleccionado.id)
+                        Toast.makeText(this, "Ingreso eliminado: ${ingresoSeleccionado.descripcion}", Toast.LENGTH_SHORT).show()
+                    }
+                    ingresosDialogBuilder.setNegativeButton("Cancelar") { dialog, _ -> dialog.dismiss() }
+
+                    // Mostrar el AlertDialog
+                    ingresosDialogBuilder.create().show()
+                }
+            }
+            builderAnio.setNegativeButton("Cancelar") { dialog, _ -> dialog.dismiss() }
+            builderAnio.create().show()  // Mostrar el dialog de selección de año
         }
-        builder.setNegativeButton("Cancelar") { dialog, _ -> dialog.dismiss() }
-
-        // Mostrar el AlertDialog
-        builder.create().show()
+        builderMes.setNegativeButton("Cancelar") { dialog, _ -> dialog.dismiss() }
+        builderMes.create().show()  // Mostrar el dialog de selección de mes
     }
+
+
+
 
     fun calcularTotalesPorCategoria(gastos: List<Modelos.Gasto>): Map<String, Float> {
         val totales = mutableMapOf<String, Float>()
@@ -143,23 +210,59 @@ class KakeboActivity : AppCompatActivity() {
     }
 
     private fun mostrarGastos() {
-        val listaGastos = dbHelper.obtenerGastos()
-        val gastosTexto = listaGastos.map { "\nDescripción: ${it.descripcion}, \nMonto: ${it.monto}, \nCategoría: ${it.categoria} \n-------------" }.toTypedArray()
+        // Pedir al usuario que seleccione un mes
+        val meses = arrayOf("Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre")
 
-        // Crear el AlertDialog con una lista de ingresos
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle("Lista de gastos")
-        builder.setItems(gastosTexto) { dialog, which ->
-            // Eliminar el ingreso seleccionado
-            val gastoSeleccionado = listaGastos[which]
-            dbHelper.borrarIngreso(gastoSeleccionado.id)
-            Toast.makeText(this, "Gasto eliminado: ${gastoSeleccionado.descripcion}", Toast.LENGTH_SHORT).show()
+        // Crear el AlertDialog para seleccionar un mes
+        val builderMes = AlertDialog.Builder(this)
+        builderMes.setTitle("Selecciona un mes")
+        builderMes.setItems(meses) { dialog, which ->
+            // Establecer el mes seleccionado
+            mesSeleccionado = which + 1  // Ajustar índice para que Enero sea 1, Febrero 2, etc.
+
+            // Ahora, pedir al usuario que seleccione un año
+            val anios = arrayOf("2023", "2024", "2025", "2026") // Puedes agregar más años según tus necesidades
+
+            val builderAnio = AlertDialog.Builder(this)
+            builderAnio.setTitle("Selecciona un año")
+            builderAnio.setItems(anios) { _, which ->
+                // Establecer el año seleccionado
+                anioSeleccionado = anios[which].toInt()  // Asignamos el valor del año seleccionado a la variable anioSeleccionado
+
+                // Mostrar los gastos para el mes y año seleccionados
+                val listaGastos = dbHelper.obtenerGastosPorMesYAnio(mesSeleccionado, anioSeleccionado)
+
+                if (listaGastos.isEmpty()) {
+                    Toast.makeText(this, "No hay gastos para el mes y año seleccionados.", Toast.LENGTH_SHORT).show()
+                } else {
+                    // Mostrar los gastos en un AlertDialog
+                    val gastosTexto = listaGastos.map { "\nDescripción: ${it.descripcion}, \nMonto: ${it.monto}, \nCategoría: ${it.categoria}, \nMes: ${meses[it.mes - 1]}, \nAño: ${it.anio}\n-------------" }.toTypedArray()
+
+                    // Crear el AlertDialog con una lista de gastos
+                    val gastosDialogBuilder = AlertDialog.Builder(this)
+                    gastosDialogBuilder.setTitle("Lista de gastos de ${meses[mesSeleccionado - 1]} ${anioSeleccionado}")
+                    gastosDialogBuilder.setItems(gastosTexto) { dialog, which ->
+                        // Eliminar el gasto seleccionado
+                        val gastoSeleccionado = listaGastos[which]
+                        dbHelper.borrarGasto(gastoSeleccionado.id)
+                        Toast.makeText(this, "Gasto eliminado: ${gastoSeleccionado.descripcion}", Toast.LENGTH_SHORT).show()
+                    }
+                    gastosDialogBuilder.setNegativeButton("Cancelar") { dialog, _ -> dialog.dismiss() }
+
+                    // Mostrar el AlertDialog
+                    gastosDialogBuilder.create().show()
+                }
+            }
+            builderAnio.setNegativeButton("Cancelar") { dialog, _ -> dialog.dismiss() }
+            builderAnio.create().show()  // Mostrar el dialog de selección de año
         }
-        builder.setNegativeButton("Cancelar") { dialog, _ -> dialog.dismiss() }
-
-        // Mostrar el AlertDialog
-        builder.create().show()
+        builderMes.setNegativeButton("Cancelar") { dialog, _ -> dialog.dismiss() }
+        builderMes.create().show()  // Mostrar el dialog de selección de mes
     }
+
+
+
+
 
 
 

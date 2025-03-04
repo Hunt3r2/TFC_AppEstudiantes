@@ -5,14 +5,18 @@ class Modelos {
         val id: Int,
         val monto: Double,
         val descripcion: String,
-        val categoria: String
+        val categoria: String,
+        val mes: Int,
+        val anio: Int
     )
 
     data class Gasto(
         val id: Int,
         val monto: Double,
         val descripcion: String,
-        val categoria: String
+        val categoria: String,
+        val mes: Int,
+        val anio:Int
     )
 
     data class Categoria(
