@@ -1,6 +1,5 @@
 package com.example.proyectoappfinanzas
 
-import BaseDatosKakebo
 import android.annotation.SuppressLint
 import android.app.DatePickerDialog
 import android.content.Intent
@@ -19,14 +18,18 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import kotlinx.coroutines.launch
+import androidx.lifecycle.lifecycleScope
+import com.example.proyectoappfinanzas.R
+import com.example.proyectoappfinanzas.database.AppDatabase
+import com.example.proyectoappfinanzas.modelos.Ingreso
+import com.example.proyectoappfinanzas.modelos.Gasto
 import java.util.Calendar
 
-
 class KakeboActivity : AppCompatActivity() {
-    private lateinit var dbHelper: BaseDatosKakebo
+    private lateinit var db: AppDatabase
     private var mesSeleccionado: Int = 0
     private var anioSeleccionado: Int = 0
-
 
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,54 +42,33 @@ class KakeboActivity : AppCompatActivity() {
             insets
         }
 
-        val volverAtras: FloatingActionButton = findViewById(R.id.volver_atras)
+        db = AppDatabase.getDatabase(this)
 
-        // Configura el listener para el botón
+        val volverAtras: FloatingActionButton = findViewById(R.id.volver_atras)
         volverAtras.setOnClickListener {
-            // Crea un Intent para iniciar la nueva actividad
             val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent) // Inicia la nueva actividad
+            startActivity(intent)
         }
 
         val botonInfo: FloatingActionButton = findViewById(R.id.boton_info)
-
         botonInfo.setOnClickListener {
-
             val builder = AlertDialog.Builder(this)
             builder.setTitle("Información")
-            val kakeboInfo= Html.fromHtml(getString(R.string.info_kakebo), Html.FROM_HTML_MODE_LEGACY)
+            val kakeboInfo = Html.fromHtml(getString(R.string.info_kakebo), Html.FROM_HTML_MODE_LEGACY)
             builder.setMessage(kakeboInfo)
             builder.setPositiveButton("Aceptar") { dialog, _ -> dialog.dismiss() }
-
-            // Muestra el AlertDialog
-            val dialog = builder.create()
-            dialog.show()
+            builder.create().show()
         }
 
-        lateinit var spinnerCategoria: Spinner
         val categorias = arrayOf("Salario", "Regalo", "Freelance", "Inversión")
-        spinnerCategoria = findViewById(R.id.spinnerCategoria)
+        val spinnerCategoria: Spinner = findViewById(R.id.spinnerCategoria)
+        val spinnerCategoriaGasto: Spinner = findViewById(R.id.spinnerCategoriaGasto)
 
-        lateinit var spinnerCategoriaGasto: Spinner
-        spinnerCategoriaGasto = findViewById(R.id.spinnerCategoriaGasto)
-
-        // Configurar el adaptador para el Spinner
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, categorias)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerCategoria.adapter = adapter
         spinnerCategoriaGasto.adapter = adapter
 
-        val btnMostrarIngresos: Button = findViewById(R.id.boton_mostrarIngresos)
-        btnMostrarIngresos.setOnClickListener {
-            mostrarIngresos()
-        }
-
-        val btnMostrarGastos: Button = findViewById(R.id.boton_mostrarGastos)
-        btnMostrarGastos.setOnClickListener {
-            mostrarGastos()
-        }
-
-        dbHelper = BaseDatosKakebo(this)
         val editTextMonto: EditText = findViewById(R.id.dineroIngresado)
         val editTextDescripcion: EditText = findViewById(R.id.descIngreso)
         val editTextMontoGasto: EditText = findViewById(R.id.dineroGastado)
@@ -94,7 +76,6 @@ class KakeboActivity : AppCompatActivity() {
         val btnGuardarTodo: Button = findViewById(R.id.boton_guardar)
 
         btnGuardarTodo.setOnClickListener {
-            // Validar si se ha seleccionado un mes y un año
             if (mesSeleccionado == 0 || anioSeleccionado == 0) {
                 Toast.makeText(this, "Por favor, seleccione un mes y un año.", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
@@ -106,8 +87,12 @@ class KakeboActivity : AppCompatActivity() {
             val categoriaIngreso = spinnerCategoria.selectedItem.toString()
 
             if (montoIngreso != null) {
-                dbHelper.agregarIngreso(montoIngreso, descripcionIngreso, categoriaIngreso, mesSeleccionado, anioSeleccionado)  // Añadir el año aquí
-                Toast.makeText(this, "Ingreso guardado", Toast.LENGTH_SHORT).show()
+                lifecycleScope.launch {
+                    db.ingresoDao().agregarIngreso(Ingreso(monto = montoIngreso, descripcion = descripcionIngreso, categoria = categoriaIngreso, mes = mesSeleccionado, anio = anioSeleccionado))
+                    runOnUiThread {
+                        Toast.makeText(this@KakeboActivity, "Ingreso guardado", Toast.LENGTH_SHORT).show()
+                    }
+                }
             } else {
                 Toast.makeText(this, "Por favor, ingrese un monto válido para el ingreso", Toast.LENGTH_SHORT).show()
             }
@@ -118,95 +103,87 @@ class KakeboActivity : AppCompatActivity() {
             val categoriaGasto = spinnerCategoriaGasto.selectedItem.toString()
 
             if (montoGasto != null) {
-                dbHelper.agregarGasto(montoGasto, descripcionGasto, categoriaGasto, mesSeleccionado, anioSeleccionado)  // Añadir el año aquí
-                Toast.makeText(this, "Gasto guardado", Toast.LENGTH_SHORT).show()
+                lifecycleScope.launch {
+                    db.gastoDao().agregarGasto(Gasto(monto = montoGasto, descripcion = descripcionGasto, categoria = categoriaGasto, mes = mesSeleccionado, anio = anioSeleccionado))
+                    runOnUiThread {
+                        Toast.makeText(this@KakeboActivity, "Gasto guardado", Toast.LENGTH_SHORT).show()
+                    }
+                }
             } else {
                 Toast.makeText(this, "Por favor, ingrese un monto válido para el gasto", Toast.LENGTH_SHORT).show()
             }
         }
 
         val btnSeleccionarFecha: Button = findViewById(R.id.btnSeleccionarFecha)
-
         btnSeleccionarFecha.setOnClickListener {
             val calendar = Calendar.getInstance()
             val year = calendar.get(Calendar.YEAR)
-            val month = calendar.get(Calendar.MONTH) // Mes en base 0 (Enero es 0, Febrero es 1, etc.)
+            val month = calendar.get(Calendar.MONTH)
 
-            val datePickerDialog = DatePickerDialog(this, DatePickerDialog.OnDateSetListener { _, selectedYear, selectedMonth, _ ->
-                // Al seleccionar una fecha, guarda el año y el mes
+            val datePickerDialog = DatePickerDialog(this, { _, selectedYear, selectedMonth, _ ->
                 anioSeleccionado = selectedYear
-                mesSeleccionado = selectedMonth + 1 // Ajustar para que Enero sea 1, Febrero sea 2, etc.
+                mesSeleccionado = selectedMonth + 1
                 Toast.makeText(this, "Fecha seleccionada: $selectedMonth/$selectedYear", Toast.LENGTH_SHORT).show()
-            }, year, month, 1) // El "1" es el día predeterminado (1 de cada mes)
+            }, year, month, 1)
 
             datePickerDialog.show()
         }
 
+        val btnMostrarIngresos: Button = findViewById(R.id.boton_mostrarIngresos)
+        btnMostrarIngresos.setOnClickListener {
+            mostrarIngresos()
+        }
 
+        val btnMostrarGastos: Button = findViewById(R.id.boton_mostrarGastos)
+        btnMostrarGastos.setOnClickListener {
+            mostrarGastos()
+        }
     }
 
     private fun mostrarIngresos() {
-        // Pedir al usuario que seleccione un mes
         val meses = arrayOf("Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre")
 
-        // Crear el AlertDialog para seleccionar un mes
         val builderMes = AlertDialog.Builder(this)
         builderMes.setTitle("Selecciona un mes")
         builderMes.setItems(meses) { dialog, which ->
-            // Establecer el mes seleccionado
-            mesSeleccionado = which + 1  // Ajustar índice para que Enero sea 1, Febrero 2, etc.
+            mesSeleccionado = which + 1
 
-            // Ahora, pedir al usuario que seleccione un año
-            val anios = arrayOf("2023", "2024", "2025", "2026") // Puedes agregar más años según tus necesidades
-
+            val anios = arrayOf("2023", "2024", "2025", "2026")
             val builderAnio = AlertDialog.Builder(this)
             builderAnio.setTitle("Selecciona un año")
             builderAnio.setItems(anios) { _, which ->
-                // Establecer el año seleccionado
-                anioSeleccionado = anios[which].toInt()  // Asignamos el valor del año seleccionado a la variable anioSeleccionado
+                anioSeleccionado = anios[which].toInt()
 
-                // Mostrar los ingresos para el mes y año seleccionados
-                val listaIngresos = dbHelper.obtenerIngresosPorMesYAnio(mesSeleccionado, anioSeleccionado)
+                lifecycleScope.launch {
+                    val listaIngresos = db.ingresoDao().obtenerIngresosPorMesYAnio(mesSeleccionado, anioSeleccionado)
+                    runOnUiThread {
+                        if (listaIngresos.isEmpty()) {
+                            Toast.makeText(this@KakeboActivity, "No hay ingresos para el mes y año seleccionados.", Toast.LENGTH_SHORT).show()
+                        } else {
+                            val ingresosTexto = listaIngresos.map { "\nDescripción: ${it.descripcion}, \nMonto: ${it.monto}, \nCategoría: ${it.categoria}, \nMes: ${meses[it.mes - 1]}, \nAño: ${it.anio}\n-------------" }.toTypedArray()
 
-                if (listaIngresos.isEmpty()) {
-                    Toast.makeText(this, "No hay ingresos para el mes y año seleccionados.", Toast.LENGTH_SHORT).show()
-                } else {
-                    // Mostrar los ingresos en un AlertDialog
-                    val ingresosTexto = listaIngresos.map { "\nDescripción: ${it.descripcion}, \nMonto: ${it.monto}, \nCategoría: ${it.categoria}, \nMes: ${meses[it.mes - 1]}, \nAño: ${it.anio}\n-------------" }.toTypedArray()
-
-                    // Crear el AlertDialog con una lista de ingresos
-                    val ingresosDialogBuilder = AlertDialog.Builder(this)
-                    ingresosDialogBuilder.setTitle("Lista de ingresos de ${meses[mesSeleccionado - 1]} ${anioSeleccionado}")
-                    ingresosDialogBuilder.setItems(ingresosTexto) { dialog, which ->
-                        // Eliminar el ingreso seleccionado
-                        val ingresoSeleccionado = listaIngresos[which]
-                        dbHelper.borrarIngreso(ingresoSeleccionado.id)
-                        Toast.makeText(this, "Ingreso eliminado: ${ingresoSeleccionado.descripcion}", Toast.LENGTH_SHORT).show()
+                            val ingresosDialogBuilder = AlertDialog.Builder(this@KakeboActivity)
+                            ingresosDialogBuilder.setTitle("Lista de ingresos de ${meses[mesSeleccionado - 1]} $anioSeleccionado")
+                            ingresosDialogBuilder.setItems(ingresosTexto) { dialog, which ->
+                                val ingresoSeleccionado = listaIngresos[which]
+                                lifecycleScope.launch {
+                                    db.ingresoDao().borrarIngreso(ingresoSeleccionado.id)
+                                    runOnUiThread {
+                                        Toast.makeText(this@KakeboActivity, "Ingreso eliminado: ${ingresoSeleccionado.descripcion}", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            }
+                            ingresosDialogBuilder.setNegativeButton("Cancelar") { dialog, _ -> dialog.dismiss() }
+                            ingresosDialogBuilder.create().show()
+                        }
                     }
-                    ingresosDialogBuilder.setNegativeButton("Cancelar") { dialog, _ -> dialog.dismiss() }
-
-                    // Mostrar el AlertDialog
-                    ingresosDialogBuilder.create().show()
                 }
             }
             builderAnio.setNegativeButton("Cancelar") { dialog, _ -> dialog.dismiss() }
-            builderAnio.create().show()  // Mostrar el dialog de selección de año
+            builderAnio.create().show()
         }
         builderMes.setNegativeButton("Cancelar") { dialog, _ -> dialog.dismiss() }
-        builderMes.create().show()  // Mostrar el dialog de selección de mes
-    }
-
-
-
-
-    fun calcularTotalesPorCategoria(gastos: List<Modelos.Gasto>): Map<String, Float> {
-        val totales = mutableMapOf<String, Float>()
-
-        for (gasto in gastos) {
-            totales[gasto.categoria] = (totales.getOrDefault(gasto.categoria, 0f) + gasto.monto).toFloat()
-        }
-
-        return totales
+        builderMes.create().show()
     }
 
     private fun mostrarGastos() {
@@ -230,27 +207,34 @@ class KakeboActivity : AppCompatActivity() {
                 anioSeleccionado = anios[which].toInt()  // Asignamos el valor del año seleccionado a la variable anioSeleccionado
 
                 // Mostrar los gastos para el mes y año seleccionados
-                val listaGastos = dbHelper.obtenerGastosPorMesYAnio(mesSeleccionado, anioSeleccionado)
+                lifecycleScope.launch {
+                    val listaGastos = db.gastoDao().obtenerGastosPorMesYAnio(mesSeleccionado, anioSeleccionado)
+                    runOnUiThread {
+                        if (listaGastos.isEmpty()) {
+                            Toast.makeText(this@KakeboActivity, "No hay gastos para el mes y año seleccionados.", Toast.LENGTH_SHORT).show()
+                        } else {
+                            // Mostrar los gastos en un AlertDialog
+                            val gastosTexto = listaGastos.map { "\nDescripción: ${it.descripcion}, \nMonto: ${it.monto}, \nCategoría: ${it.categoria}, \nMes: ${meses[it.mes - 1]}, \nAño: ${it.anio}\n-------------" }.toTypedArray()
 
-                if (listaGastos.isEmpty()) {
-                    Toast.makeText(this, "No hay gastos para el mes y año seleccionados.", Toast.LENGTH_SHORT).show()
-                } else {
-                    // Mostrar los gastos en un AlertDialog
-                    val gastosTexto = listaGastos.map { "\nDescripción: ${it.descripcion}, \nMonto: ${it.monto}, \nCategoría: ${it.categoria}, \nMes: ${meses[it.mes - 1]}, \nAño: ${it.anio}\n-------------" }.toTypedArray()
+                            // Crear el AlertDialog con una lista de gastos
+                            val gastosDialogBuilder = AlertDialog.Builder(this@KakeboActivity)
+                            gastosDialogBuilder.setTitle("Lista de gastos de ${meses[mesSeleccionado - 1]} $anioSeleccionado")
+                            gastosDialogBuilder.setItems(gastosTexto) { dialog, which ->
+                                // Eliminar el gasto seleccionado
+                                val gastoSeleccionado = listaGastos[which]
+                                lifecycleScope.launch {
+                                    db.gastoDao().borrarGasto(gastoSeleccionado.id)
+                                    runOnUiThread {
+                                        Toast.makeText(this@KakeboActivity, "Gasto eliminado: ${gastoSeleccionado.descripcion}", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            }
+                            gastosDialogBuilder.setNegativeButton("Cancelar") { dialog, _ -> dialog.dismiss() }
 
-                    // Crear el AlertDialog con una lista de gastos
-                    val gastosDialogBuilder = AlertDialog.Builder(this)
-                    gastosDialogBuilder.setTitle("Lista de gastos de ${meses[mesSeleccionado - 1]} ${anioSeleccionado}")
-                    gastosDialogBuilder.setItems(gastosTexto) { dialog, which ->
-                        // Eliminar el gasto seleccionado
-                        val gastoSeleccionado = listaGastos[which]
-                        dbHelper.borrarGasto(gastoSeleccionado.id)
-                        Toast.makeText(this, "Gasto eliminado: ${gastoSeleccionado.descripcion}", Toast.LENGTH_SHORT).show()
+                            // Mostrar el AlertDialog
+                            gastosDialogBuilder.create().show()
+                        }
                     }
-                    gastosDialogBuilder.setNegativeButton("Cancelar") { dialog, _ -> dialog.dismiss() }
-
-                    // Mostrar el AlertDialog
-                    gastosDialogBuilder.create().show()
                 }
             }
             builderAnio.setNegativeButton("Cancelar") { dialog, _ -> dialog.dismiss() }
@@ -259,12 +243,4 @@ class KakeboActivity : AppCompatActivity() {
         builderMes.setNegativeButton("Cancelar") { dialog, _ -> dialog.dismiss() }
         builderMes.create().show()  // Mostrar el dialog de selección de mes
     }
-
-
-
-
-
-
-
-
 }
