@@ -4,6 +4,10 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.example.proyectoappfinanzas.dao.GastoDao
+import com.example.proyectoappfinanzas.dao.IngresoDao
+import com.example.proyectoappfinanzas.dao.NotaDao
+import com.example.proyectoappfinanzas.dao.PomodoroDao
 import com.example.proyectoappfinanzas.modelos.Ingreso
 import com.example.proyectoappfinanzas.modelos.Gasto
 
@@ -11,6 +15,9 @@ import com.example.proyectoappfinanzas.modelos.Gasto
 abstract class AppDatabase : RoomDatabase() {
     abstract fun ingresoDao(): IngresoDao
     abstract fun gastoDao(): GastoDao
+    abstract fun notaDao(): NotaDao
+    abstract fun pomodoroDao(): PomodoroDao
+
 
     companion object {
         @Volatile
@@ -21,7 +28,7 @@ abstract class AppDatabase : RoomDatabase() {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
-                    "kakebo_database"
+                    "GestorDB"
                 ).build()
                 INSTANCE = instance
                 instance
