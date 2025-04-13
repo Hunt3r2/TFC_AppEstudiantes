@@ -4,8 +4,10 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
-import android.os.CountDownTimer
+import android.os.VibrationEffect
+import android.os.Vibrator
 import androidx.core.app.NotificationCompat
+import kotlinx.coroutines.*
 
 class PomodoroTemporizador(
     private val context: Context,
@@ -18,10 +20,13 @@ class PomodoroTemporizador(
 ) {
     private var cicloActual = 0
     private var enTrabajo = true
-    private var timer: CountDownTimer? = null
+    private var tiempoRestante: Int = 0
+    private var job: Job? = null
+    private var pausado = false
 
     fun iniciar() {
         cicloActual = 0
+        enTrabajo = true
         iniciarCiclo()
     }
 
@@ -29,30 +34,70 @@ class PomodoroTemporizador(
         if (cicloActual >= ciclos) {
             onFinish()
             mostrarNotificacion("Pomodoro terminado", "Todos los ciclos completados")
+            vibrar()
             return
         }
 
         val duracion = if (enTrabajo) tiempoTrabajo else if ((cicloActual + 1) % 4 == 0) tiempoPausaLarga else tiempoDescanso
+        if (duracion <= 0) {
+            mostrarNotificacion("Error de configuración", "Duración no puede ser cero o negativa")
+            onFinish()
+            return
+        }
 
-        timer = object : CountDownTimer(duracion * 60_000L, 1_000L) {
-            override fun onTick(millisUntilFinished: Long) {
-                onTick(millisUntilFinished)
+        tiempoRestante = duracion * 60
+
+        job = CoroutineScope(Dispatchers.Main).launch {
+            while (tiempoRestante > 0 && !pausado) {
+                delay(1000L)
+                tiempoRestante--
+                onTick(tiempoRestante * 1000L)
             }
 
-            override fun onFinish() {
+            if (tiempoRestante == 0) {
                 mostrarNotificacion(
                     if (enTrabajo) "Trabajo terminado" else "Descanso terminado",
                     if (enTrabajo) "Hora de descansar" else "Hora de trabajar"
                 )
+                vibrar()
+
                 if (!enTrabajo) cicloActual++
                 enTrabajo = !enTrabajo
                 iniciarCiclo()
             }
-        }.start()
+        }
+    }
+
+    fun pausar() {
+        pausado = true
+        job?.cancel()
+    }
+
+    fun reanudar() {
+        pausado = false
+        job = CoroutineScope(Dispatchers.Main).launch {
+            while (tiempoRestante > 0 && !pausado) {
+                delay(1000L)
+                tiempoRestante--
+                onTick(tiempoRestante * 1000L)
+            }
+
+            if (tiempoRestante == 0) {
+                mostrarNotificacion(
+                    if (enTrabajo) "Trabajo terminado" else "Descanso terminado",
+                    if (enTrabajo) "Hora de descansar" else "Hora de trabajar"
+                )
+                vibrar()
+
+                if (!enTrabajo) cicloActual++
+                enTrabajo = !enTrabajo
+                iniciarCiclo()
+            }
+        }
     }
 
     fun detener() {
-        timer?.cancel()
+        job?.cancel()
     }
 
     private fun mostrarNotificacion(titulo: String, mensaje: String) {
@@ -76,5 +121,14 @@ class PomodoroTemporizador(
             .build()
 
         manager.notify(System.currentTimeMillis().toInt(), notificacion)
+    }
+
+    private fun vibrar() {
+        val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            vibrator.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE))
+        } else {
+            vibrator.vibrate(500)
+        }
     }
 }

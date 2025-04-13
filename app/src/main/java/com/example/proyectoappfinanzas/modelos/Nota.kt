@@ -1,11 +1,5 @@
 package com.example.proyectoappfinanzas.modelos
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.content.Context
-import android.os.Build
-import android.os.CountDownTimer
-import androidx.core.app.NotificationCompat
 import androidx.room.*
 import java.util.*
 

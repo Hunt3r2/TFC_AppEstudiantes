@@ -1,25 +1,32 @@
 package com.example.proyectoappfinanzas
 
-import android.annotation.SuppressLint
 import android.os.Bundle
-import android.widget.Button
-import android.widget.TextView
+import android.os.Handler
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import java.util.Timer
-import java.util.TimerTask
+import androidx.lifecycle.lifecycleScope
+import com.example.proyectoappfinanzas.database.AppDatabase
+import com.example.proyectoappfinanzas.modelos.Pomodoro
+import com.example.proyectoappfinanzas.PomodoroTemporizador
+import kotlinx.coroutines.launch
 
 class PomodoroActivity : AppCompatActivity() {
     private lateinit var tvTimer: TextView
     private lateinit var btnStart: Button
     private lateinit var btnStop: Button
+    private lateinit var btnGuardar: Button
+    private lateinit var btnEliminar: Button
+    private lateinit var etDescripcion: EditText
+    private lateinit var etTrabajo: EditText
+    private lateinit var etDescanso: EditText
+    private lateinit var etPausaLarga: EditText
+    private lateinit var etRepeticiones: EditText
+    private lateinit var spinnerPomodoros: Spinner
 
-    private var isRunning = false
-    private var isBreakTime = false // Nuevo flag para indicar si es tiempo de descanso
-    private var timeLeftInMillis: Long = 25 * 60 * 1000  // 25 minutos en milisegundos
-    private var timer: Timer? = null
-    private val handler = android.os.Handler()
+    private var listaPomodoros: List<Pomodoro> = listOf()
+    private var timer: PomodoroTemporizador? = null
+    private val handler = Handler()
 
-    @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_pomodoro)
@@ -27,76 +34,132 @@ class PomodoroActivity : AppCompatActivity() {
         tvTimer = findViewById(R.id.tv_timer)
         btnStart = findViewById(R.id.btn_start)
         btnStop = findViewById(R.id.btn_stop)
+        btnGuardar = findViewById(R.id.btn_guardar)
+        btnEliminar = Button(this).apply { text = "Eliminar Pomodoro" }
+        etDescripcion = findViewById(R.id.et_descripcion)
+        etTrabajo = findViewById(R.id.et_trabajo)
+        etDescanso = findViewById(R.id.et_descanso)
+        etPausaLarga = findViewById(R.id.et_pausa_larga)
+        etRepeticiones = findViewById(R.id.et_repeticiones)
+        spinnerPomodoros = findViewById(R.id.spinner_pomodoros)
+
+        (spinnerPomodoros.parent as LinearLayout).addView(btnEliminar)
+
+        btnStart.isEnabled = false
+
+        cargarPomodorosGuardados()
+
+        btnGuardar.setOnClickListener {
+            guardarConfiguracion()
+        }
+
+        btnEliminar.setOnClickListener {
+            val seleccionado = spinnerPomodoros.selectedItemPosition
+            if (seleccionado in listaPomodoros.indices) {
+                val pomodoro = listaPomodoros[seleccionado]
+                lifecycleScope.launch {
+                    AppDatabase.getDatabase(this@PomodoroActivity).pomodoroDao().eliminar(pomodoro)
+                    cargarPomodorosGuardados()
+                    Toast.makeText(this@PomodoroActivity, "Pomodoro eliminado", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
 
         btnStart.setOnClickListener {
-            if (!isRunning) {
-                startPomodoro()
+            val seleccionado = spinnerPomodoros.selectedItemPosition
+            if (listaPomodoros.isEmpty() || seleccionado !in listaPomodoros.indices) {
+                Toast.makeText(this, "Selecciona una configuración válida", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
             }
+            iniciarTemporizador(listaPomodoros[seleccionado])
         }
 
         btnStop.setOnClickListener {
-            stopPomodoro()
+            detenerTemporizador()
         }
 
-        updateTimerText()
+        spinnerPomodoros.setOnItemSelectedListener(object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: android.view.View, position: Int, id: Long) {
+                if (position in listaPomodoros.indices) {
+                    val pomodoro = listaPomodoros[position]
+                    etDescripcion.setText(pomodoro.descripcion)
+                    etTrabajo.setText(pomodoro.tiempo_trabajo.toString())
+                    etDescanso.setText(pomodoro.tiempo_descanso.toString())
+                    etPausaLarga.setText(pomodoro.tiempo_pausa_larga.toString())
+                    etRepeticiones.setText(pomodoro.repetir_pomodoro.toString())
+                }
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {}
+        })
     }
 
-    private fun startPomodoro() {
-        isRunning = true
+    private fun guardarConfiguracion() {
+        val descripcion = etDescripcion.text.toString()
+        val trabajo = etTrabajo.text.toString().toIntOrNull() ?: 25
+        val descanso = etDescanso.text.toString().toIntOrNull() ?: 5
+        val pausa = etPausaLarga.text.toString().toIntOrNull() ?: 15
+        val repeticiones = etRepeticiones.text.toString().toIntOrNull() ?: 4
+
+        val pomodoro = Pomodoro(
+            descripcion = descripcion,
+            tiempo_trabajo = trabajo,
+            tiempo_descanso = descanso,
+            tiempo_pausa_larga = pausa,
+            repetir_pomodoro = repeticiones
+        )
+
+        lifecycleScope.launch {
+            AppDatabase.getDatabase(this@PomodoroActivity).pomodoroDao().insertar(pomodoro)
+            cargarPomodorosGuardados()
+            Toast.makeText(this@PomodoroActivity, "Pomodoro guardado", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun cargarPomodorosGuardados() {
+        lifecycleScope.launch {
+            listaPomodoros = AppDatabase.getDatabase(this@PomodoroActivity).pomodoroDao().obtenerTodos()
+            val descripciones = listaPomodoros.map { it.descripcion }
+            val adapter = ArrayAdapter(this@PomodoroActivity, android.R.layout.simple_spinner_item, descripciones)
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            spinnerPomodoros.adapter = adapter
+            btnStart.isEnabled = listaPomodoros.isNotEmpty()
+        }
+    }
+
+    private fun iniciarTemporizador(p: Pomodoro) {
+        detenerTemporizador()
         btnStart.isEnabled = false
         btnStop.isEnabled = true
 
-        // Si no es tiempo de descanso, empieza el cronómetro de trabajo
-        if (!isBreakTime) {
-            timeLeftInMillis = 25 * 60 * 1000 // 25 minutos
-        } else {
-            timeLeftInMillis = 5 * 60 * 1000 // 5 minutos de descanso
-        }
-
-        timer = Timer()
-        timer?.schedule(object : TimerTask() {
-            override fun run() {
-                if (timeLeftInMillis > 0) {
-                    timeLeftInMillis -= 1000
-                    handler.post {
-                        updateTimerText()
-                    }
-                } else {
-                    if (!isBreakTime) {
-                        // Cuando termine el tiempo de trabajo, inicia el descanso
-                        startBreak()
-                    } else {
-                        // Cuando termine el descanso, reinicia el ciclo de trabajo
-                        startPomodoro()
-                    }
+        timer = PomodoroTemporizador(
+            context = this,
+            tiempoTrabajo = p.tiempo_trabajo,
+            tiempoDescanso = p.tiempo_descanso,
+            tiempoPausaLarga = p.tiempo_pausa_larga,
+            ciclos = p.repetir_pomodoro,
+            onTick = { millis ->
+                handler.post {
+                    val min = (millis / 1000) / 60
+                    val sec = (millis / 1000) % 60
+                    tvTimer.text = String.format("%02d:%02d", min, sec)
+                }
+            },
+            onFinish = {
+                handler.post {
+                    Toast.makeText(this, "Pomodoro completado", Toast.LENGTH_SHORT).show()
+                    tvTimer.text = "00:00"
+                    btnStart.isEnabled = true
+                    btnStop.isEnabled = false
                 }
             }
-        }, 0, 1000)  // 1 segundo
+        )
+        timer?.iniciar()
     }
 
-    private fun startBreak() {
-        isBreakTime = true
-        timeLeftInMillis = 5 * 60 * 1000 // 5 minutos de descanso
-        handler.post {
-            updateTimerText()
-        }
-        btnStart.isEnabled = true  // Habilitar el botón de inicio para el siguiente ciclo
-    }
-
-    private fun stopPomodoro() {
-        isRunning = false
-        isBreakTime = false
+    private fun detenerTemporizador() {
+        timer?.detener()
         btnStart.isEnabled = true
         btnStop.isEnabled = false
-        timer?.cancel()
-        timer = null
-        timeLeftInMillis = 25 * 60 * 1000 // Reseteamos el tiempo a 25 minutos
-        updateTimerText()
-    }
-
-    private fun updateTimerText() {
-        val minutes = (timeLeftInMillis / 1000) / 60
-        val seconds = (timeLeftInMillis / 1000) % 60
-        tvTimer.text = String.format("%02d:%02d", minutes, seconds)
     }
 }
