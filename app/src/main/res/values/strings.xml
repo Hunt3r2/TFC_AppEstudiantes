@@ -35,4 +35,9 @@
         <b>Establecimiento de Metas:</b><br/>
         Con base en tu análisis mensual, establece metas para el próximo mes. Esto puede incluir aumentar tu ahorro, reducir gastos en ciertas categorías, o incluso planificar para un gasto grande que se avecina.
     ]]></string>
+
+    <string name="info_pomodoro"><![CDATA[
+       <hr>hola</hr>
+    ]]></string>
+
 </resources>

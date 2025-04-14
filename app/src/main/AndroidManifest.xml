@@ -25,6 +25,12 @@
             android:name=".KakeboActivity"
             android:exported="false" />
         <activity
+            android:name=".NotasActivity"
+            android:exported="false" />
+        <activity
+            android:name=".NotaFormularioActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>

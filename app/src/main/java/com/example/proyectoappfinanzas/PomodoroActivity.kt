@@ -1,18 +1,25 @@
 package com.example.proyectoappfinanzas
 
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
+import android.text.Html
+import android.view.View
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.proyectoappfinanzas.database.AppDatabase
 import com.example.proyectoappfinanzas.modelos.Pomodoro
 import com.example.proyectoappfinanzas.PomodoroTemporizador
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.launch
 
 class PomodoroActivity : AppCompatActivity() {
     private lateinit var tvTimer: TextView
     private lateinit var btnStart: Button
+    private lateinit var btnPause: Button
+    private lateinit var btnResume: Button
     private lateinit var btnStop: Button
     private lateinit var btnGuardar: Button
     private lateinit var btnEliminar: Button
@@ -33,6 +40,8 @@ class PomodoroActivity : AppCompatActivity() {
 
         tvTimer = findViewById(R.id.tv_timer)
         btnStart = findViewById(R.id.btn_start)
+        btnPause = findViewById(R.id.btn_pause)
+        btnResume = findViewById(R.id.btn_resume)
         btnStop = findViewById(R.id.btn_stop)
         btnGuardar = findViewById(R.id.btn_guardar)
         btnEliminar = Button(this).apply { text = "Eliminar Pomodoro" }
@@ -74,12 +83,24 @@ class PomodoroActivity : AppCompatActivity() {
             iniciarTemporizador(listaPomodoros[seleccionado])
         }
 
+        btnPause.setOnClickListener {
+            timer?.pausar()
+            btnPause.visibility = View.GONE
+            btnResume.visibility = View.VISIBLE
+        }
+
+        btnResume.setOnClickListener {
+            timer?.reanudar()
+            btnResume.visibility = View.GONE
+            btnPause.visibility = View.VISIBLE
+        }
+
         btnStop.setOnClickListener {
             detenerTemporizador()
         }
 
         spinnerPomodoros.setOnItemSelectedListener(object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: android.view.View, position: Int, id: Long) {
+            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
                 if (position in listaPomodoros.indices) {
                     val pomodoro = listaPomodoros[position]
                     etDescripcion.setText(pomodoro.descripcion)
@@ -92,6 +113,22 @@ class PomodoroActivity : AppCompatActivity() {
 
             override fun onNothingSelected(parent: AdapterView<*>) {}
         })
+
+        val volverAtras: FloatingActionButton = findViewById(R.id.volver_atras)
+        volverAtras.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+        }
+
+        val botonInfo: FloatingActionButton = findViewById(R.id.boton_info)
+        botonInfo.setOnClickListener {
+            val builder = AlertDialog.Builder(this)
+            builder.setTitle("Información")
+            val kakeboInfo = Html.fromHtml(getString(R.string.info_kakebo), Html.FROM_HTML_MODE_LEGACY)
+            builder.setMessage(kakeboInfo)
+            builder.setPositiveButton("Aceptar") { dialog, _ -> dialog.dismiss() }
+            builder.create().show()
+        }
     }
 
     private fun guardarConfiguracion() {
@@ -131,6 +168,8 @@ class PomodoroActivity : AppCompatActivity() {
         detenerTemporizador()
         btnStart.isEnabled = false
         btnStop.isEnabled = true
+        btnPause.visibility = View.VISIBLE
+        btnResume.visibility = View.GONE
 
         timer = PomodoroTemporizador(
             context = this,
@@ -151,6 +190,8 @@ class PomodoroActivity : AppCompatActivity() {
                     tvTimer.text = "00:00"
                     btnStart.isEnabled = true
                     btnStop.isEnabled = false
+                    btnPause.visibility = View.GONE
+                    btnResume.visibility = View.GONE
                 }
             }
         )
@@ -161,5 +202,7 @@ class PomodoroActivity : AppCompatActivity() {
         timer?.detener()
         btnStart.isEnabled = true
         btnStop.isEnabled = false
+        btnPause.visibility = View.GONE
+        btnResume.visibility = View.GONE
     }
 }

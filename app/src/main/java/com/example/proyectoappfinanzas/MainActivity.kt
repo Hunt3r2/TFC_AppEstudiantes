@@ -37,5 +37,14 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, KakeboActivity::class.java)
             startActivity(intent) // Inicia la nueva actividad
         }
+
+        val buttonNotas: Button = findViewById(R.id.boton_notas)
+
+        // Configura el listener para el botón
+        buttonNotas.setOnClickListener {
+            // Crea un Intent para iniciar la nueva actividad
+            val intent = Intent(this, NotasActivity::class.java)
+            startActivity(intent) // Inicia la nueva actividad
+        }
     }
 }

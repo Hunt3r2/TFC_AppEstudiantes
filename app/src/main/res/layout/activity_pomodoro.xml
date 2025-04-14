@@ -1,47 +1,87 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
         android:orientation="vertical"
-        android:padding="16dp"
-        android:gravity="center_horizontal">
+        android:padding="16dp">
 
         <!-- Temporizador -->
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/boton_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:translationX="150dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@android:drawable/ic_dialog_info" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/volver_atras"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:translationX="-150dp"
+            android:translationY="-55dp"
+            app:layout_constraintEnd_toStartOf="@+id/boton_info"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@android:drawable/ic_menu_revert" />
+
         <TextView
             android:id="@+id/tv_timer"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="25:00"
-            android:textSize="50sp"
-            android:textAlignment="center" />
+            android:textAlignment="center"
+            android:textSize="50sp" />
 
         <!-- Botones control temporizador -->
         <Button
             android:id="@+id/btn_start"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Iniciar Pomodoro"
-            android:layout_marginTop="20dp" />
+            android:layout_marginTop="20dp"
+            android:text="Iniciar Pomodoro" />
+
+        <Button
+            android:id="@+id/btn_pause"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Pausar"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/btn_resume"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Reanudar"
+            android:visibility="gone" />
 
         <Button
             android:id="@+id/btn_stop"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Detener Pomodoro"
             android:layout_marginTop="10dp"
-            android:enabled="false" />
+            android:enabled="false"
+            android:text="Detener Pomodoro" />
 
         <!-- Configuración personalizada -->
         <EditText
             android:id="@+id/et_descripcion"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Descripción"
-            android:layout_marginTop="30dp" />
+            android:layout_marginTop="30dp"
+            android:hint="Descripción" />
 
         <EditText
             android:id="@+id/et_trabajo"
@@ -75,16 +115,16 @@
             android:id="@+id/btn_guardar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Guardar configuración"
-            android:layout_marginTop="16dp" />
+            android:layout_marginTop="16dp"
+            android:text="Guardar configuración" />
 
         <!-- Spinner para configuraciones guardadas -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
             android:text="Seleccionar Pomodoro"
-            android:textStyle="bold"
-            android:layout_marginTop="24dp" />
+            android:textStyle="bold" />
 
         <Spinner
             android:id="@+id/spinner_pomodoros"
