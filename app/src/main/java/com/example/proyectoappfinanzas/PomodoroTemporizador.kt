@@ -3,6 +3,7 @@ package com.example.proyectoappfinanzas
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.media.MediaPlayer
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
@@ -24,6 +25,10 @@ class PomodoroTemporizador(
     private var job: Job? = null
     private var pausado = false
 
+    private val preferencias = context.getSharedPreferences("pomodoro_settings", Context.MODE_PRIVATE)
+    private val sonidoActivado = preferencias.getBoolean("sonido", true)
+    private val vibracionActivada = preferencias.getBoolean("vibracion", true)
+
     fun iniciar() {
         cicloActual = 0
         enTrabajo = true
@@ -33,14 +38,13 @@ class PomodoroTemporizador(
     private fun iniciarCiclo() {
         if (cicloActual >= ciclos) {
             onFinish()
-            mostrarNotificacion("Pomodoro terminado", "Todos los ciclos completados")
-            vibrar()
+            notificar("Pomodoro terminado", "Todos los ciclos completados")
             return
         }
 
         val duracion = if (enTrabajo) tiempoTrabajo else if ((cicloActual + 1) % 4 == 0) tiempoPausaLarga else tiempoDescanso
         if (duracion <= 0) {
-            mostrarNotificacion("Error de configuración", "Duración no puede ser cero o negativa")
+            notificar("Error de configuración", "Duración no puede ser cero o negativa")
             onFinish()
             return
         }
@@ -55,10 +59,11 @@ class PomodoroTemporizador(
             }
 
             if (tiempoRestante == 0) {
-                mostrarNotificacion(
+                notificar(
                     if (enTrabajo) "Trabajo terminado" else "Descanso terminado",
                     if (enTrabajo) "Hora de descansar" else "Hora de trabajar"
                 )
+                reproducirSonido()
                 vibrar()
 
                 if (!enTrabajo) cicloActual++
@@ -83,10 +88,11 @@ class PomodoroTemporizador(
             }
 
             if (tiempoRestante == 0) {
-                mostrarNotificacion(
+                notificar(
                     if (enTrabajo) "Trabajo terminado" else "Descanso terminado",
                     if (enTrabajo) "Hora de descansar" else "Hora de trabajar"
                 )
+                reproducirSonido()
                 vibrar()
 
                 if (!enTrabajo) cicloActual++
@@ -100,16 +106,12 @@ class PomodoroTemporizador(
         job?.cancel()
     }
 
-    private fun mostrarNotificacion(titulo: String, mensaje: String) {
+    private fun notificar(titulo: String, mensaje: String) {
         val channelId = "pomodoro_channel"
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                channelId,
-                "Pomodoro Notifications",
-                NotificationManager.IMPORTANCE_DEFAULT
-            )
+            val channel = NotificationChannel(channelId, "Pomodoro Notifications", NotificationManager.IMPORTANCE_DEFAULT)
             manager.createNotificationChannel(channel)
         }
 
@@ -124,6 +126,7 @@ class PomodoroTemporizador(
     }
 
     private fun vibrar() {
+        if (!vibracionActivada) return
         val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             vibrator.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE))
@@ -131,4 +134,12 @@ class PomodoroTemporizador(
             vibrator.vibrate(500)
         }
     }
+
+    private fun reproducirSonido() {
+        if (!sonidoActivado) return
+        val mediaPlayer = MediaPlayer.create(context, android.provider.Settings.System.DEFAULT_NOTIFICATION_URI)
+        mediaPlayer.setOnCompletionListener { it.release() }
+        mediaPlayer.start()
+    }
 }
+

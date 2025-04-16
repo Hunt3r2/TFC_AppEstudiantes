@@ -46,5 +46,14 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, NotasActivity::class.java)
             startActivity(intent) // Inicia la nueva actividad
         }
+
+        val buttonSettings: Button = findViewById(R.id.boton_settings)
+
+        // Configura el listener para el botón
+        buttonSettings.setOnClickListener {
+            // Crea un Intent para iniciar la nueva actividad
+            val intent = Intent(this, SettingsActivity::class.java)
+            startActivity(intent) // Inicia la nueva actividad
+        }
     }
 }

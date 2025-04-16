@@ -32,4 +32,11 @@
         android:text="Guardar"
         android:layout_marginTop="12dp" />
 
+    <Button
+        android:id="@+id/btnEliminarNota"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Eliminar"
+        android:layout_marginTop="8dp"
+        android:visibility="gone" />
 </LinearLayout>

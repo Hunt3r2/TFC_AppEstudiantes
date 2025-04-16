@@ -15,6 +15,7 @@ class NotaFormularioActivity : AppCompatActivity() {
     private lateinit var etTitulo: EditText
     private lateinit var etContenido: EditText
     private lateinit var btnGuardar: Button
+    private lateinit var btnEliminar: Button
 
     private var notaId: Int? = null
 
@@ -25,14 +26,20 @@ class NotaFormularioActivity : AppCompatActivity() {
         etTitulo = findViewById(R.id.etTitulo)
         etContenido = findViewById(R.id.etContenido)
         btnGuardar = findViewById(R.id.btnGuardarNota)
+        btnEliminar = findViewById(R.id.btnEliminarNota)
 
         notaId = intent.getIntExtra("nota_id", -1).takeIf { it != -1 }
         if (notaId != null) {
             cargarNota(notaId!!)
+            btnEliminar.visibility = Button.VISIBLE
         }
 
         btnGuardar.setOnClickListener {
             guardarNota()
+        }
+
+        btnEliminar.setOnClickListener {
+            eliminarNota()
         }
     }
 
@@ -63,6 +70,17 @@ class NotaFormularioActivity : AppCompatActivity() {
                 dao.actualizar(Nota(notaId!!, titulo, contenido, Date()))
             }
             finish()
+        }
+    }
+
+    private fun eliminarNota() {
+        notaId?.let { id ->
+            lifecycleScope.launch {
+                val dao = AppDatabase.getDatabase(this@NotaFormularioActivity).notaDao()
+                dao.eliminar(Nota(id, "", "", Date()))
+                Toast.makeText(this@NotaFormularioActivity, "Nota eliminada", Toast.LENGTH_SHORT).show()
+                finish()
+            }
         }
     }
 }

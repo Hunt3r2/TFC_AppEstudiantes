@@ -13,7 +13,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AppCompat.DayNight"
+        android:theme="@style/Theme.ProyectoAppFinanzas"
         tools:targetApi="31">
         <activity
             android:name=".PomodoroActivity"
@@ -29,6 +29,9 @@
             android:exported="false" />
         <activity
             android:name=".NotaFormularioActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SettingsActivity"
             android:exported="false" />
         <activity
             android:name=".MainActivity"

@@ -44,16 +44,13 @@ class PomodoroActivity : AppCompatActivity() {
         btnResume = findViewById(R.id.btn_resume)
         btnStop = findViewById(R.id.btn_stop)
         btnGuardar = findViewById(R.id.btn_guardar)
-        btnEliminar = Button(this).apply { text = "Eliminar Pomodoro" }
+        btnEliminar = findViewById(R.id.btnEliminar)
         etDescripcion = findViewById(R.id.et_descripcion)
         etTrabajo = findViewById(R.id.et_trabajo)
         etDescanso = findViewById(R.id.et_descanso)
         etPausaLarga = findViewById(R.id.et_pausa_larga)
         etRepeticiones = findViewById(R.id.et_repeticiones)
         spinnerPomodoros = findViewById(R.id.spinner_pomodoros)
-
-        (spinnerPomodoros.parent as LinearLayout).addView(btnEliminar)
-
         btnStart.isEnabled = false
 
         cargarPomodorosGuardados()
