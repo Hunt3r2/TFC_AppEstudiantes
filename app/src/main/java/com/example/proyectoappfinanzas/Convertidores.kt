@@ -8,5 +8,5 @@ class Convertidores {
     fun fromTimestamp(value: Long?): Date? = value?.let { Date(it) }
 
     @TypeConverter
-    fun dateToTimestamp(date: Date?): Long? = date?.time
+    fun dateATimestamp(date: Date?): Long? = date?.time
 }

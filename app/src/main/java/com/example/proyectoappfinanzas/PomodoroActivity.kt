@@ -11,15 +11,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.proyectoappfinanzas.database.AppDatabase
 import com.example.proyectoappfinanzas.modelos.Pomodoro
-import com.example.proyectoappfinanzas.PomodoroTemporizador
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.launch
 
 class PomodoroActivity : AppCompatActivity() {
-    private lateinit var tvTimer: TextView
+    private lateinit var tvTemporizador: TextView
     private lateinit var btnStart: Button
     private lateinit var btnPause: Button
-    private lateinit var btnResume: Button
+    private lateinit var btnContinuar: Button
     private lateinit var btnStop: Button
     private lateinit var btnGuardar: Button
     private lateinit var btnEliminar: Button
@@ -38,10 +37,10 @@ class PomodoroActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_pomodoro)
 
-        tvTimer = findViewById(R.id.tv_timer)
+        tvTemporizador = findViewById(R.id.tv_timer)
         btnStart = findViewById(R.id.btn_start)
         btnPause = findViewById(R.id.btn_pause)
-        btnResume = findViewById(R.id.btn_resume)
+        btnContinuar = findViewById(R.id.btn_resume)
         btnStop = findViewById(R.id.btn_stop)
         btnGuardar = findViewById(R.id.btn_guardar)
         btnEliminar = findViewById(R.id.btnEliminar)
@@ -83,12 +82,12 @@ class PomodoroActivity : AppCompatActivity() {
         btnPause.setOnClickListener {
             timer?.pausar()
             btnPause.visibility = View.GONE
-            btnResume.visibility = View.VISIBLE
+            btnContinuar.visibility = View.VISIBLE
         }
 
-        btnResume.setOnClickListener {
+        btnContinuar.setOnClickListener {
             timer?.reanudar()
-            btnResume.visibility = View.GONE
+            btnContinuar.visibility = View.GONE
             btnPause.visibility = View.VISIBLE
         }
 
@@ -166,7 +165,7 @@ class PomodoroActivity : AppCompatActivity() {
         btnStart.isEnabled = false
         btnStop.isEnabled = true
         btnPause.visibility = View.VISIBLE
-        btnResume.visibility = View.GONE
+        btnContinuar.visibility = View.GONE
 
         timer = PomodoroTemporizador(
             context = this,
@@ -178,17 +177,17 @@ class PomodoroActivity : AppCompatActivity() {
                 handler.post {
                     val min = (millis / 1000) / 60
                     val sec = (millis / 1000) % 60
-                    tvTimer.text = String.format("%02d:%02d", min, sec)
+                    tvTemporizador.text = String.format("%02d:%02d", min, sec)
                 }
             },
             onFinish = {
                 handler.post {
                     Toast.makeText(this, "Pomodoro completado", Toast.LENGTH_SHORT).show()
-                    tvTimer.text = "00:00"
+                    tvTemporizador.text = "00:00"
                     btnStart.isEnabled = true
                     btnStop.isEnabled = false
                     btnPause.visibility = View.GONE
-                    btnResume.visibility = View.GONE
+                    btnContinuar.visibility = View.GONE
                 }
             }
         )
@@ -200,6 +199,6 @@ class PomodoroActivity : AppCompatActivity() {
         btnStart.isEnabled = true
         btnStop.isEnabled = false
         btnPause.visibility = View.GONE
-        btnResume.visibility = View.GONE
+        btnContinuar.visibility = View.GONE
     }
 }

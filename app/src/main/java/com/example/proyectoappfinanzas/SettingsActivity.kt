@@ -34,11 +34,9 @@ class SettingsActivity : AppCompatActivity() {
 
         val buttonVolver: Button = findViewById(R.id.btnVolver)
 
-        // Configura el listener para el botón
         buttonVolver.setOnClickListener {
-            // Crea un Intent para iniciar la nueva actividad
             val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent) // Inicia la nueva actividad
+            startActivity(intent)
         }
     }
 }

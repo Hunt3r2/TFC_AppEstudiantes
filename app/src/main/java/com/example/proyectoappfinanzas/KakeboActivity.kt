@@ -81,7 +81,6 @@ class KakeboActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // Guardar ingreso
             val montoIngreso = editTextMonto.text.toString().toDoubleOrNull()
             val descripcionIngreso = editTextDescripcion.text.toString()
             val categoriaIngreso = spinnerCategoria.selectedItem.toString()
@@ -97,7 +96,6 @@ class KakeboActivity : AppCompatActivity() {
                 Toast.makeText(this, "Por favor, ingrese un monto válido para el ingreso", Toast.LENGTH_SHORT).show()
             }
 
-            // Guardar gasto
             val montoGasto = editTextMontoGasto.text.toString().toDoubleOrNull()
             val descripcionGasto = editTextDescripcionGasto.text.toString()
             val categoriaGasto = spinnerCategoriaGasto.selectedItem.toString()
@@ -187,40 +185,36 @@ class KakeboActivity : AppCompatActivity() {
     }
 
     private fun mostrarGastos() {
-        // Pedir al usuario que seleccione un mes
         val meses = arrayOf("Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre")
 
-        // Crear el AlertDialog para seleccionar un mes
         val builderMes = AlertDialog.Builder(this)
         builderMes.setTitle("Selecciona un mes")
         builderMes.setItems(meses) { dialog, which ->
-            // Establecer el mes seleccionado
-            mesSeleccionado = which + 1  // Ajustar índice para que Enero sea 1, Febrero 2, etc.
+            mesSeleccionado = which + 1
 
-            // Ahora, pedir al usuario que seleccione un año
-            val anios = arrayOf("2023", "2024", "2025", "2026") // Puedes agregar más años según tus necesidades
+            val anios = arrayOf("2023", "2024", "2025", "2026")
 
             val builderAnio = AlertDialog.Builder(this)
             builderAnio.setTitle("Selecciona un año")
             builderAnio.setItems(anios) { _, which ->
-                // Establecer el año seleccionado
-                anioSeleccionado = anios[which].toInt()  // Asignamos el valor del año seleccionado a la variable anioSeleccionado
+                //establecer el año seleccionado
+                anioSeleccionado = anios[which].toInt()
 
-                // Mostrar los gastos para el mes y año seleccionados
+                //mostrar los gastos para el mes y año seleccionados
                 lifecycleScope.launch {
                     val listaGastos = db.gastoDao().obtenerGastosPorMesYAnio(mesSeleccionado, anioSeleccionado)
                     runOnUiThread {
                         if (listaGastos.isEmpty()) {
                             Toast.makeText(this@KakeboActivity, "No hay gastos para el mes y año seleccionados.", Toast.LENGTH_SHORT).show()
                         } else {
-                            // Mostrar los gastos en un AlertDialog
+                            //mostrar los gastos en un AlertDialog
                             val gastosTexto = listaGastos.map { "\nDescripción: ${it.descripcion}, \nMonto: ${it.monto}, \nCategoría: ${it.categoria}, \nMes: ${meses[it.mes - 1]}, \nAño: ${it.anio}\n-------------" }.toTypedArray()
 
-                            // Crear el AlertDialog con una lista de gastos
+                            //crear el AlertDialog con una lista de gastos
                             val gastosDialogBuilder = AlertDialog.Builder(this@KakeboActivity)
                             gastosDialogBuilder.setTitle("Lista de gastos de ${meses[mesSeleccionado - 1]} $anioSeleccionado")
                             gastosDialogBuilder.setItems(gastosTexto) { dialog, which ->
-                                // Eliminar el gasto seleccionado
+                                //eliminar el gasto seleccionado
                                 val gastoSeleccionado = listaGastos[which]
                                 lifecycleScope.launch {
                                     db.gastoDao().borrarGasto(gastoSeleccionado.id)
@@ -231,16 +225,17 @@ class KakeboActivity : AppCompatActivity() {
                             }
                             gastosDialogBuilder.setNegativeButton("Cancelar") { dialog, _ -> dialog.dismiss() }
 
-                            // Mostrar el AlertDialog
                             gastosDialogBuilder.create().show()
                         }
                     }
                 }
             }
             builderAnio.setNegativeButton("Cancelar") { dialog, _ -> dialog.dismiss() }
-            builderAnio.create().show()  // Mostrar el dialog de selección de año
+            //mostrar el dialog de selección de año
+            builderAnio.create().show()
         }
         builderMes.setNegativeButton("Cancelar") { dialog, _ -> dialog.dismiss() }
-        builderMes.create().show()  // Mostrar el dialog de selección de mes
+        //mostrar el dialog de selección de mes
+        builderMes.create().show()
     }
 }
