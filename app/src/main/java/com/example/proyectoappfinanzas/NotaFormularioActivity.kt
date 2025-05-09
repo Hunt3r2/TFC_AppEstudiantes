@@ -6,7 +6,7 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.example.proyectoappfinanzas.database.AppDatabase
+import com.example.proyectoappfinanzas.database.AppBD
 import com.example.proyectoappfinanzas.modelos.Nota
 import kotlinx.coroutines.launch
 import java.util.*
@@ -45,7 +45,7 @@ class NotaFormularioActivity : AppCompatActivity() {
 
     private fun cargarNota(id: Int) {
         lifecycleScope.launch {
-            val nota = AppDatabase.getDatabase(this@NotaFormularioActivity).notaDao().obtenerPorId(id)
+            val nota = AppBD.getDatabase(this@NotaFormularioActivity).notaDao().obtenerPorId(id)
             nota?.let {
                 etTitulo.setText(it.titulo)
                 etContenido.setText(it.contenido)
@@ -63,7 +63,7 @@ class NotaFormularioActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            val dao = AppDatabase.getDatabase(this@NotaFormularioActivity).notaDao()
+            val dao = AppBD.getDatabase(this@NotaFormularioActivity).notaDao()
             if (notaId == null) {
                 dao.insertar(Nota(0, titulo, contenido, Date()))
             } else {
@@ -76,7 +76,7 @@ class NotaFormularioActivity : AppCompatActivity() {
     private fun eliminarNota() {
         notaId?.let { id ->
             lifecycleScope.launch {
-                val dao = AppDatabase.getDatabase(this@NotaFormularioActivity).notaDao()
+                val dao = AppBD.getDatabase(this@NotaFormularioActivity).notaDao()
                 dao.eliminar(Nota(id, "", "", Date()))
                 Toast.makeText(this@NotaFormularioActivity, "Nota eliminada", Toast.LENGTH_SHORT).show()
                 finish()

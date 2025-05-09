@@ -6,44 +6,53 @@
     android:layout_height="match_parent"
     android:padding="8dp">
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/boton_info"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:clickable="true"
-        android:translationX="335dp"
-        android:translationY="15dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@android:drawable/ic_dialog_info" />
+        android:gravity="center_horizontal"
+        android:orientation="horizontal">
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/volver_atras"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        android:translationX="0dp"
-        android:translationY="15dp"
-        app:layout_constraintEnd_toStartOf="@+id/boton_info"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@android:drawable/ic_menu_revert" />
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/volver_atras"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            app:srcCompat="@android:drawable/ic_menu_revert" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerNotas"
-        android:layout_width="398dp"
-        android:layout_height="594dp"
-        android:layout_above="@id/fabAgregarNota"
-        android:clipToPadding="false"
-        android:paddingBottom="72dp" />
+        <Space
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/boton_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+
+            android:clickable="true"
+            app:srcCompat="@android:drawable/ic_dialog_info" />
+    </LinearLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabAgregarNota"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
         android:layout_margin="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="239dp"
+        android:layout_marginBottom="673dp"
         android:contentDescription="Agregar Nota"
         app:srcCompat="@android:drawable/ic_input_add" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerNotas"
+        android:layout_width="403dp"
+        android:layout_height="636dp"
+        android:layout_above="@id/fabAgregarNota"
+        android:clipToPadding="false"
+        android:paddingBottom="72dp" />
 
 </RelativeLayout>

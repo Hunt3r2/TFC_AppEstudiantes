@@ -29,7 +29,6 @@ class MainActivity : AppCompatActivity() {
 
         val buttonKakebo: Button = findViewById(R.id.boton_kakebo)
 
-        // Configura el listener para el botón
         buttonKakebo.setOnClickListener {
             val intent = Intent(this, KakeboActivity::class.java)
             startActivity(intent)
@@ -39,6 +38,13 @@ class MainActivity : AppCompatActivity() {
 
         buttonNotas.setOnClickListener {
             val intent = Intent(this, NotasActivity::class.java)
+            startActivity(intent)
+        }
+
+        val buttonFlashcard: Button = findViewById(R.id.boton_flashcards)
+
+        buttonFlashcard.setOnClickListener {
+            val intent = Intent(this, FlashcardActivity::class.java)
             startActivity(intent)
         }
 

@@ -22,11 +22,9 @@ class InfoActivity : AppCompatActivity() {
 
         val volverAtras: FloatingActionButton = findViewById(R.id.volver_atras)
 
-        // Configura el listener para el botón
         volverAtras.setOnClickListener {
-            // Crea un Intent para iniciar la nueva actividad
             val intent = Intent(this, KakeboActivity::class.java)
-            startActivity(intent) // Inicia la nueva actividad
+            startActivity(intent)
         }
 
     }

@@ -8,7 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.proyectoappfinanzas.database.AppDatabase
+import com.example.proyectoappfinanzas.database.AppBD
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.launch
 
@@ -62,7 +62,7 @@ class NotasActivity : AppCompatActivity() {
 
     private fun cargarNotas() {
         lifecycleScope.launch {
-            val notas = AppDatabase.getDatabase(this@NotasActivity).notaDao().obtenerTodas()
+            val notas = AppBD.getDatabase(this@NotasActivity).notaDao().obtenerTodas()
             notaAdapter.submitList(notas)
         }
     }

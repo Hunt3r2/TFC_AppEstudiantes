@@ -9,7 +9,7 @@ import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.example.proyectoappfinanzas.database.AppDatabase
+import com.example.proyectoappfinanzas.database.AppBD
 import com.example.proyectoappfinanzas.modelos.Pomodoro
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.launch
@@ -63,7 +63,7 @@ class PomodoroActivity : AppCompatActivity() {
             if (seleccionado in listaPomodoros.indices) {
                 val pomodoro = listaPomodoros[seleccionado]
                 lifecycleScope.launch {
-                    AppDatabase.getDatabase(this@PomodoroActivity).pomodoroDao().eliminar(pomodoro)
+                    AppBD.getDatabase(this@PomodoroActivity).pomodoroDao().eliminar(pomodoro)
                     cargarPomodorosGuardados()
                     Toast.makeText(this@PomodoroActivity, "Pomodoro eliminado", Toast.LENGTH_SHORT).show()
                 }
@@ -74,7 +74,6 @@ class PomodoroActivity : AppCompatActivity() {
             val seleccionado = spinnerPomodoros.selectedItemPosition
             if (listaPomodoros.isEmpty() || seleccionado !in listaPomodoros.indices) {
                 Toast.makeText(this, "Selecciona una configuración válida", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
             }
             iniciarTemporizador(listaPomodoros[seleccionado])
         }
@@ -143,7 +142,7 @@ class PomodoroActivity : AppCompatActivity() {
         )
 
         lifecycleScope.launch {
-            AppDatabase.getDatabase(this@PomodoroActivity).pomodoroDao().insertar(pomodoro)
+            AppBD.getDatabase(this@PomodoroActivity).pomodoroDao().insertar(pomodoro)
             cargarPomodorosGuardados()
             Toast.makeText(this@PomodoroActivity, "Pomodoro guardado", Toast.LENGTH_SHORT).show()
         }
@@ -151,7 +150,7 @@ class PomodoroActivity : AppCompatActivity() {
 
     private fun cargarPomodorosGuardados() {
         lifecycleScope.launch {
-            listaPomodoros = AppDatabase.getDatabase(this@PomodoroActivity).pomodoroDao().obtenerTodos()
+            listaPomodoros = AppBD.getDatabase(this@PomodoroActivity).pomodoroDao().obtenerTodos()
             val descripciones = listaPomodoros.map { it.descripcion }
             val adapter = ArrayAdapter(this@PomodoroActivity, android.R.layout.simple_spinner_item, descripciones)
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)

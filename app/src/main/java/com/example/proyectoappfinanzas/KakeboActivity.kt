@@ -5,8 +5,7 @@ import android.app.DatePickerDialog
 import android.content.Intent
 import android.os.Bundle
 import android.text.Html
-import android.view.View
-import android.widget.AdapterView
+import android.view.WindowManager
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
@@ -15,34 +14,29 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.launch
 import androidx.lifecycle.lifecycleScope
-import com.example.proyectoappfinanzas.R
-import com.example.proyectoappfinanzas.database.AppDatabase
+import com.example.proyectoappfinanzas.database.AppBD
 import com.example.proyectoappfinanzas.modelos.Ingreso
 import com.example.proyectoappfinanzas.modelos.Gasto
 import java.util.Calendar
 
 class KakeboActivity : AppCompatActivity() {
-    private lateinit var db: AppDatabase
+    private lateinit var db: AppBD
     private var mesSeleccionado: Int = 0
     private var anioSeleccionado: Int = 0
+    private var diaSeleccionado: Int = 0
 
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_kakebo)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
+        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_MODE_CHANGED)
 
-        db = AppDatabase.getDatabase(this)
+
+        db = AppBD.getDatabase(this)
 
         val volverAtras: FloatingActionButton = findViewById(R.id.volver_atras)
         volverAtras.setOnClickListener {
@@ -76,7 +70,7 @@ class KakeboActivity : AppCompatActivity() {
         val btnGuardarTodo: Button = findViewById(R.id.boton_guardar)
 
         btnGuardarTodo.setOnClickListener {
-            if (mesSeleccionado == 0 || anioSeleccionado == 0) {
+            if (mesSeleccionado == 0 || anioSeleccionado == 0 || diaSeleccionado == 0) {
                 Toast.makeText(this, "Por favor, seleccione un mes y un año.", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
@@ -87,7 +81,7 @@ class KakeboActivity : AppCompatActivity() {
 
             if (montoIngreso != null) {
                 lifecycleScope.launch {
-                    db.ingresoDao().agregarIngreso(Ingreso(monto = montoIngreso, descripcion = descripcionIngreso, categoria = categoriaIngreso, mes = mesSeleccionado, anio = anioSeleccionado))
+                    db.ingresoDao().agregarIngreso(Ingreso(monto = montoIngreso, descripcion = descripcionIngreso, categoria = categoriaIngreso, mes = mesSeleccionado, anio = anioSeleccionado, dia = diaSeleccionado))
                     runOnUiThread {
                         Toast.makeText(this@KakeboActivity, "Ingreso guardado", Toast.LENGTH_SHORT).show()
                     }
@@ -102,7 +96,7 @@ class KakeboActivity : AppCompatActivity() {
 
             if (montoGasto != null) {
                 lifecycleScope.launch {
-                    db.gastoDao().agregarGasto(Gasto(monto = montoGasto, descripcion = descripcionGasto, categoria = categoriaGasto, mes = mesSeleccionado, anio = anioSeleccionado))
+                    db.gastoDao().agregarGasto(Gasto(monto = montoGasto, descripcion = descripcionGasto, categoria = categoriaGasto, mes = mesSeleccionado, anio = anioSeleccionado, dia = diaSeleccionado))
                     runOnUiThread {
                         Toast.makeText(this@KakeboActivity, "Gasto guardado", Toast.LENGTH_SHORT).show()
                     }
@@ -115,16 +109,18 @@ class KakeboActivity : AppCompatActivity() {
         val btnSeleccionarFecha: Button = findViewById(R.id.btnSeleccionarFecha)
         btnSeleccionarFecha.setOnClickListener {
             val calendar = Calendar.getInstance()
-            val year = calendar.get(Calendar.YEAR)
-            val month = calendar.get(Calendar.MONTH)
+            val dia = calendar.get(Calendar.DAY_OF_MONTH)
+            val anio = calendar.get(Calendar.YEAR)
+            val mes = calendar.get(Calendar.MONTH)
 
-            val datePickerDialog = DatePickerDialog(this, { _, selectedYear, selectedMonth, _ ->
-                anioSeleccionado = selectedYear
-                mesSeleccionado = selectedMonth + 1
-                Toast.makeText(this, "Fecha seleccionada: $selectedMonth/$selectedYear", Toast.LENGTH_SHORT).show()
-            }, year, month, 1)
+            val dialog = DatePickerDialog(this, { _, anioSeleccionado, mesSeleccionado, diaSeleccionado ->
+                this.anioSeleccionado = anioSeleccionado
+                this.mesSeleccionado = mesSeleccionado + 1
+                this.diaSeleccionado = diaSeleccionado;
+                Toast.makeText(this, "Fecha seleccionada: $diaSeleccionado/$mesSeleccionado/$anioSeleccionado", Toast.LENGTH_SHORT).show()
+            }, anio, mes, dia)
 
-            datePickerDialog.show()
+            dialog.show()
         }
 
         val btnMostrarIngresos: Button = findViewById(R.id.boton_mostrarIngresos)
@@ -146,7 +142,7 @@ class KakeboActivity : AppCompatActivity() {
         builderMes.setItems(meses) { dialog, which ->
             mesSeleccionado = which + 1
 
-            val anios = arrayOf("2023", "2024", "2025", "2026")
+            val anios = arrayOf("2025", "2026", "2027")
             val builderAnio = AlertDialog.Builder(this)
             builderAnio.setTitle("Selecciona un año")
             builderAnio.setItems(anios) { _, which ->
@@ -158,7 +154,7 @@ class KakeboActivity : AppCompatActivity() {
                         if (listaIngresos.isEmpty()) {
                             Toast.makeText(this@KakeboActivity, "No hay ingresos para el mes y año seleccionados.", Toast.LENGTH_SHORT).show()
                         } else {
-                            val ingresosTexto = listaIngresos.map { "\nDescripción: ${it.descripcion}, \nMonto: ${it.monto}, \nCategoría: ${it.categoria}, \nMes: ${meses[it.mes - 1]}, \nAño: ${it.anio}\n-------------" }.toTypedArray()
+                            val ingresosTexto = listaIngresos.map { "\nDescripción: ${it.descripcion}, \nMonto: ${it.monto}, \nCategoría: ${it.categoria}, \n${it.dia} de ${meses[it.mes - 1]} de ${it.anio}\n-------------" }.toTypedArray()
 
                             val ingresosDialogBuilder = AlertDialog.Builder(this@KakeboActivity)
                             ingresosDialogBuilder.setTitle("Lista de ingresos de ${meses[mesSeleccionado - 1]} $anioSeleccionado")
@@ -192,8 +188,7 @@ class KakeboActivity : AppCompatActivity() {
         builderMes.setItems(meses) { dialog, which ->
             mesSeleccionado = which + 1
 
-            val anios = arrayOf("2023", "2024", "2025", "2026")
-
+            val anios = arrayOf("2025", "2026", "2027")
             val builderAnio = AlertDialog.Builder(this)
             builderAnio.setTitle("Selecciona un año")
             builderAnio.setItems(anios) { _, which ->
@@ -208,7 +203,7 @@ class KakeboActivity : AppCompatActivity() {
                             Toast.makeText(this@KakeboActivity, "No hay gastos para el mes y año seleccionados.", Toast.LENGTH_SHORT).show()
                         } else {
                             //mostrar los gastos en un AlertDialog
-                            val gastosTexto = listaGastos.map { "\nDescripción: ${it.descripcion}, \nMonto: ${it.monto}, \nCategoría: ${it.categoria}, \nMes: ${meses[it.mes - 1]}, \nAño: ${it.anio}\n-------------" }.toTypedArray()
+                            val gastosTexto = listaGastos.map { "\nDescripción: ${it.descripcion}, \nMonto: ${it.monto}, \nCategoría: ${it.categoria}, \n ${it.dia} de ${meses[it.mes - 1]} de ${it.anio}\n-------------" }.toTypedArray()
 
                             //crear el AlertDialog con una lista de gastos
                             val gastosDialogBuilder = AlertDialog.Builder(this@KakeboActivity)
