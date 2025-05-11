@@ -9,3 +9,4 @@ data class Flashcard(
     val pregunta: String,
     val respuesta: String
 )
+

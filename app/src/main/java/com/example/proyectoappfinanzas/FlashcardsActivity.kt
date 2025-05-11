@@ -2,39 +2,43 @@ package com.example.proyectoappfinanzas
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
+import android.view.animation.AccelerateDecelerateInterpolator
+import android.view.animation.AnimationUtils
+import android.view.animation.LayoutAnimationController
+import android.view.animation.OvershootInterpolator
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.proyectoappfinanzas.adapters.FlashcardAdapter
 import com.example.proyectoappfinanzas.database.AppBD
+import com.example.proyectoappfinanzas.modelos.Flashcard
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.launch
 
 class FlashcardsActivity : AppCompatActivity() {
-
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var adapter: FlashcardAdapter
-    private lateinit var db: AppBD
+    private lateinit var recyclerFlashcards: RecyclerView
+    private lateinit var adapter: FlashcardFlipAdapter
+    private lateinit var fabAddFlashcard: FloatingActionButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_flashcard)
+        setContentView(R.layout.activity_flashcards)
 
-        recyclerView = findViewById(R.id.recyclerFlashcards)
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        adapter = FlashcardAdapter { flashcard ->
+        recyclerFlashcards = findViewById(R.id.recyclerFlashcards)
+        fabAddFlashcard = findViewById(R.id.btnAgregarFlashcard)
+
+        adapter = FlashcardFlipAdapter(onEditClick = { flashcard ->
             val intent = Intent(this, FlashcardFormularioActivity::class.java)
             intent.putExtra("flashcard_id", flashcard.id)
             startActivity(intent)
-        }
-        recyclerView.adapter = adapter
+        })
 
-        db = AppBD.getDatabase(this)
+        recyclerFlashcards.layoutManager = LinearLayoutManager(this)
+        recyclerFlashcards.itemAnimator = DefaultItemAnimator()
+        recyclerFlashcards.adapter = adapter
 
-        val fab: FloatingActionButton = findViewById(R.id.fab_add_flashcard)
-        fab.setOnClickListener {
+        fabAddFlashcard.setOnClickListener {
             val intent = Intent(this, FlashcardFormularioActivity::class.java)
             startActivity(intent)
         }
@@ -47,13 +51,8 @@ class FlashcardsActivity : AppCompatActivity() {
 
     private fun cargarFlashcards() {
         lifecycleScope.launch {
-            val flashcards = db.flashcardsDao().obtenerTodas()
-            runOnUiThread {
-                if (flashcards.isEmpty()) {
-                    Toast.makeText(this@FlashcardsActivity, "No hay flashcards", Toast.LENGTH_SHORT).show()
-                }
-                adapter.submitList(flashcards)
-            }
+            val flashcards = AppBD.getDatabase(this@FlashcardsActivity).flashcardDao().obtenerTodas()
+            adapter.setFlashcards(flashcards)
         }
     }
 }

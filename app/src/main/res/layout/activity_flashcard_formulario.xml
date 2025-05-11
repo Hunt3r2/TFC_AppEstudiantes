@@ -1,35 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:padding="16dp">
 
-    <LinearLayout
+    <EditText
+        android:id="@+id/etPregunta"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:hint="Pregunta"
+        android:inputType="text" />
 
-        <EditText
-            android:id="@+id/et_front"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Pregunta (Front)"
-            android:inputType="text"
-            android:layout_marginBottom="12dp" />
+    <EditText
+        android:id="@+id/etRespuesta"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Respuesta"
+        android:inputType="text"
+        android:layout_marginTop="8dp" />
 
-        <EditText
-            android:id="@+id/et_back"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Respuesta (Back)"
-            android:inputType="text"
-            android:layout_marginBottom="24dp" />
+    <Button
+        android:id="@+id/btnGuardarFlashcard"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Guardar"
+        android:layout_marginTop="16dp" />
 
-        <Button
-            android:id="@+id/btn_guardar_flashcard"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Guardar Flashcard" />
-
-    </LinearLayout>
-</ScrollView>
+</LinearLayout>

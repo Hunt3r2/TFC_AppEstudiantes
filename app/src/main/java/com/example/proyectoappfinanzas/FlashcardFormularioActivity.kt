@@ -12,49 +12,37 @@ import kotlinx.coroutines.launch
 
 class FlashcardFormularioActivity : AppCompatActivity() {
 
-    private lateinit var etFront: EditText
-    private lateinit var etBack: EditText
+    private lateinit var etPregunta: EditText
+    private lateinit var etRespuesta: EditText
     private lateinit var btnGuardar: Button
-
-    private var flashcardId: Long? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_flashcard_formulario)
 
-        etFront = findViewById(R.id.et_front)
-        etBack = findViewById(R.id.et_back)
-        btnGuardar = findViewById(R.id.btn_guardar_flashcard)
+        etPregunta = findViewById(R.id.etPregunta)
+        etRespuesta = findViewById(R.id.etRespuesta)
+        btnGuardar = findViewById(R.id.btnGuardarFlashcard)
 
-        flashcardId = intent.getLongExtra("flashcard_id", -1).takeIf { it != -1L }
-
-        if (flashcardId != null) {
-            lifecycleScope.launch {
-                val flashcard = AppBD.getDatabase(this@FlashcardFormularioActivity).flashcardDao().obtenerPorId(flashcardId!!)
-                flashcard?.let {
-                    etFront.setText(it.front)
-                    etBack.setText(it.back)
-                }
-            }
-        }
 
         btnGuardar.setOnClickListener {
-            val front = etFront.text.toString()
-            val back = etBack.text.toString()
+            val pregunta = etPregunta.text.toString().trim()
+            val respuesta = etRespuesta.text.toString().trim()
 
-            if (front.isBlank() || back.isBlank()) {
-                Toast.makeText(this, "Completa ambos lados de la flashcard", Toast.LENGTH_SHORT).show()
+
+            if (pregunta.isBlank() || respuesta.isBlank()) {
+                Toast.makeText(this, "Completa todos los campos", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
+            val flashcard = Flashcard(pregunta = pregunta, respuesta = respuesta)
+
             lifecycleScope.launch {
-                val dao = AppBD.getDatabase(this@FlashcardFormularioActivity).flashcardDao()
-                if (flashcardId == null) {
-                    dao.insertar(Flashcard(front = front, back = back))
-                } else {
-                    dao.actualizar(Flashcard(id = flashcardId!!, front = front, back = back))
+                AppBD.getDatabase(this@FlashcardFormularioActivity).flashcardDao().insertar(flashcard)
+                runOnUiThread {
+                    Toast.makeText(this@FlashcardFormularioActivity, "Flashcard guardada", Toast.LENGTH_SHORT).show()
+                    finish()
                 }
-                finish()
             }
         }
     }

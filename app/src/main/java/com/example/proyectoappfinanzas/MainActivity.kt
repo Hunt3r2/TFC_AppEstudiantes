@@ -44,7 +44,7 @@ class MainActivity : AppCompatActivity() {
         val buttonFlashcard: Button = findViewById(R.id.boton_flashcards)
 
         buttonFlashcard.setOnClickListener {
-            val intent = Intent(this, FlashcardActivity::class.java)
+            val intent = Intent(this, FlashcardsActivity::class.java)
             startActivity(intent)
         }
 
