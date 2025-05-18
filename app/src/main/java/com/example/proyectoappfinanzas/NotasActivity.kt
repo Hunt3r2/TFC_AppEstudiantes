@@ -48,8 +48,8 @@ class NotasActivity : AppCompatActivity() {
         botonInfo.setOnClickListener {
             val builder = AlertDialog.Builder(this)
             builder.setTitle("Información")
-            val kakeboInfo = Html.fromHtml(getString(R.string.info_kakebo), Html.FROM_HTML_MODE_LEGACY)
-            builder.setMessage(kakeboInfo)
+            val notasInfo = Html.fromHtml(getString(R.string.info_notas), Html.FROM_HTML_MODE_LEGACY)
+            builder.setMessage(notasInfo)
             builder.setPositiveButton("Aceptar") { dialog, _ -> dialog.dismiss() }
             builder.create().show()
         }

@@ -7,6 +7,8 @@ import androidx.room.PrimaryKey
 data class Flashcard(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val pregunta: String,
-    val respuesta: String
+    val respuesta: String,
+    val categoria: String = "General",
+    val estado: String = "Pendiente"
 )
 

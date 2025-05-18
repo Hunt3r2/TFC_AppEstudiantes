@@ -16,4 +16,5 @@ interface FlashcardsDao {
 
     @Query("SELECT * FROM flashcards")
     suspend fun obtenerTodas(): List<Flashcard>
+
 }

@@ -1,9 +1,7 @@
 package com.example.proyectoappfinanzas
 
 import android.os.Bundle
-import android.widget.Button
-import android.widget.EditText
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.proyectoappfinanzas.database.AppBD
@@ -14,7 +12,13 @@ class FlashcardFormularioActivity : AppCompatActivity() {
 
     private lateinit var etPregunta: EditText
     private lateinit var etRespuesta: EditText
+    private lateinit var etNuevaCategoria: EditText
+    private lateinit var spinnerCategoria: Spinner
+    private lateinit var spinnerEstado: Spinner
     private lateinit var btnGuardar: Button
+
+    private val categoriasPredefinidas = mutableListOf("General", "Matemáticas", "Historia")
+    private val estados = listOf("Nuevo", "Aprendido", "Revisar")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -22,20 +26,42 @@ class FlashcardFormularioActivity : AppCompatActivity() {
 
         etPregunta = findViewById(R.id.etPregunta)
         etRespuesta = findViewById(R.id.etRespuesta)
+        etNuevaCategoria = findViewById(R.id.etNuevaCategoria)
+        spinnerCategoria = findViewById(R.id.spinnerCategoriaFlashcard)
+        spinnerEstado = findViewById(R.id.spinnerEstadoFlashcard)
         btnGuardar = findViewById(R.id.btnGuardarFlashcard)
 
+        val adapterCategoria = ArrayAdapter(this, android.R.layout.simple_spinner_item, categoriasPredefinidas)
+        adapterCategoria.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerCategoria.adapter = adapterCategoria
+
+        val adapterEstado = ArrayAdapter(this, android.R.layout.simple_spinner_item, estados)
+        adapterEstado.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerEstado.adapter = adapterEstado
 
         btnGuardar.setOnClickListener {
             val pregunta = etPregunta.text.toString().trim()
             val respuesta = etRespuesta.text.toString().trim()
-
+            val nuevaCategoria = etNuevaCategoria.text.toString().trim()
 
             if (pregunta.isBlank() || respuesta.isBlank()) {
                 Toast.makeText(this, "Completa todos los campos", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            val flashcard = Flashcard(pregunta = pregunta, respuesta = respuesta)
+            val categoria = if (nuevaCategoria.isNotBlank()) {
+                if (!categoriasPredefinidas.contains(nuevaCategoria)) {
+                    categoriasPredefinidas.add(nuevaCategoria)
+                    adapterCategoria.notifyDataSetChanged()
+                }
+                nuevaCategoria
+            } else {
+                spinnerCategoria.selectedItem.toString()
+            }
+
+            val estado = spinnerEstado.selectedItem.toString()
+
+            val flashcard = Flashcard(pregunta = pregunta, respuesta = respuesta, categoria = categoria, estado = estado)
 
             lifecycleScope.launch {
                 AppBD.getDatabase(this@FlashcardFormularioActivity).flashcardDao().insertar(flashcard)

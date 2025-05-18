@@ -19,7 +19,7 @@ import com.example.proyectoappfinanzas.modelos.Pomodoro
 
 @Database(
     entities = [Ingreso::class, Gasto::class, Nota::class, Pomodoro::class, Flashcard::class],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 @TypeConverters(Convertidores::class)
@@ -41,7 +41,7 @@ abstract class AppBD : RoomDatabase() {
                     context.applicationContext,
                     AppBD::class.java,
                     "GestorDB"
-                ).build()
+                ).fallbackToDestructiveMigration().build()
                 INSTANCE = instance
                 instance
             }
