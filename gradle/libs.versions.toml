@@ -12,6 +12,11 @@ activity = "1.10.0"
 constraintlayout = "2.2.0"
 roomCommon = "2.6.1"
 roomKtx = "2.6.1"
+room = "2.6.1"
+coroutines = "1.7.3"
+mockito = "5.11.0"
+androidxTestCore = "1.5.0"
+junitKtx = "1.2.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -25,6 +30,13 @@ androidx-activity = { group = "androidx.activity", name = "activity", version.re
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 androidx-room-common = { group = "androidx.room", name = "room-common", version.ref = "roomCommon" }
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "roomKtx" }
+room-testing = { module = "androidx.room:room-testing", version.ref = "room" }
+coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
+mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
+androidx-test-core = { module = "androidx.test:core", version.ref = "androidxTestCore" }
+arch-core-testing = { module = "androidx.arch.core:core-testing", version = "2.2.0" }
+androidx-junit-ktx = { group = "androidx.test.ext", name = "junit-ktx", version.ref = "junitKtx" }
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

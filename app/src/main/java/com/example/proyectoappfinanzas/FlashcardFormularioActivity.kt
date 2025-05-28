@@ -1,11 +1,15 @@
 package com.example.proyectoappfinanzas
 
+import android.content.Intent
 import android.os.Bundle
+import android.text.Html
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.proyectoappfinanzas.database.AppBD
 import com.example.proyectoappfinanzas.modelos.Flashcard
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.launch
 
 class FlashcardFormularioActivity : AppCompatActivity() {
@@ -30,6 +34,22 @@ class FlashcardFormularioActivity : AppCompatActivity() {
         spinnerCategoria = findViewById(R.id.spinnerCategoriaFlashcard)
         spinnerEstado = findViewById(R.id.spinnerEstadoFlashcard)
         btnGuardar = findViewById(R.id.btnGuardarFlashcard)
+
+        val volverAtras: FloatingActionButton = findViewById(R.id.volver_atras)
+        volverAtras.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+        }
+
+        val botonInfo: FloatingActionButton = findViewById(R.id.boton_info)
+        botonInfo.setOnClickListener {
+            val builder = AlertDialog.Builder(this)
+            builder.setTitle("Información")
+            val kakeboInfo = Html.fromHtml(getString(R.string.info_kakebo), Html.FROM_HTML_MODE_LEGACY)
+            builder.setMessage(kakeboInfo)
+            builder.setPositiveButton("Aceptar") { dialog, _ -> dialog.dismiss() }
+            builder.create().show()
+        }
 
         val adapterCategoria = ArrayAdapter(this, android.R.layout.simple_spinner_item, categoriasPredefinidas)
         adapterCategoria.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
