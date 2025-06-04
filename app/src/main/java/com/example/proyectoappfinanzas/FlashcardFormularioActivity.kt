@@ -12,6 +12,7 @@ import com.example.proyectoappfinanzas.modelos.Flashcard
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.launch
 
+
 class FlashcardFormularioActivity : AppCompatActivity() {
 
     private lateinit var etPregunta: EditText
@@ -24,6 +25,9 @@ class FlashcardFormularioActivity : AppCompatActivity() {
     private val categoriasPredefinidas = mutableListOf("General", "Matemáticas", "Historia")
     private val estados = listOf("Nuevo", "Aprendido", "Revisar")
 
+    private var flashcardId: Int = -1
+    private var flashcardActual: Flashcard? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_flashcard_formulario)
@@ -35,21 +39,8 @@ class FlashcardFormularioActivity : AppCompatActivity() {
         spinnerEstado = findViewById(R.id.spinnerEstadoFlashcard)
         btnGuardar = findViewById(R.id.btnGuardarFlashcard)
 
-        val volverAtras: FloatingActionButton = findViewById(R.id.volver_atras)
-        volverAtras.setOnClickListener {
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
-        }
-
-        val botonInfo: FloatingActionButton = findViewById(R.id.boton_info)
-        botonInfo.setOnClickListener {
-            val builder = AlertDialog.Builder(this)
-            builder.setTitle("Información")
-            val kakeboInfo = Html.fromHtml(getString(R.string.info_kakebo), Html.FROM_HTML_MODE_LEGACY)
-            builder.setMessage(kakeboInfo)
-            builder.setPositiveButton("Aceptar") { dialog, _ -> dialog.dismiss() }
-            builder.create().show()
-        }
+        val flashcardIdLong = intent.extras?.get("flashcard_id") as? Long
+        flashcardId = flashcardIdLong?.toInt() ?: -1
 
         val adapterCategoria = ArrayAdapter(this, android.R.layout.simple_spinner_item, categoriasPredefinidas)
         adapterCategoria.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -59,6 +50,37 @@ class FlashcardFormularioActivity : AppCompatActivity() {
         adapterEstado.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerEstado.adapter = adapterEstado
 
+        //Cargar flashcard si es edición
+        if (flashcardId != -1) {
+            lifecycleScope.launch {
+                val dao = AppBD.getDatabase(this@FlashcardFormularioActivity).flashcardDao()
+                flashcardActual = dao.obtenerPorId(flashcardId)
+
+                flashcardActual?.let { flashcard ->
+                    runOnUiThread {
+                        etPregunta.setText(flashcard.pregunta)
+                        etRespuesta.setText(flashcard.respuesta)
+
+                        val catIndex = categoriasPredefinidas.indexOf(flashcard.categoria)
+                        if (catIndex >= 0) {
+                            spinnerCategoria.setSelection(catIndex)
+                            etNuevaCategoria.setText("")
+                        } else {
+                            categoriasPredefinidas.add(flashcard.categoria)
+                            adapterCategoria.notifyDataSetChanged()
+                            etNuevaCategoria.setText(flashcard.categoria)
+                        }
+
+                        val estadoIndex = estados.indexOf(flashcard.estado)
+                        spinnerEstado.setSelection(estadoIndex.coerceAtLeast(0))
+
+                        btnGuardar.text = "Actualizar"
+                    }
+                }
+            }
+        }
+
+        //Botón guardar
         btnGuardar.setOnClickListener {
             val pregunta = etPregunta.text.toString().trim()
             val respuesta = etRespuesta.text.toString().trim()
@@ -81,15 +103,47 @@ class FlashcardFormularioActivity : AppCompatActivity() {
 
             val estado = spinnerEstado.selectedItem.toString()
 
-            val flashcard = Flashcard(pregunta = pregunta, respuesta = respuesta, categoria = categoria, estado = estado)
-
             lifecycleScope.launch {
-                AppBD.getDatabase(this@FlashcardFormularioActivity).flashcardDao().insertar(flashcard)
+                val dao = AppBD.getDatabase(this@FlashcardFormularioActivity).flashcardDao()
+
+                if (flashcardActual != null) {
+                    val flashcardEditada = flashcardActual!!.copy(
+                        pregunta = pregunta,
+                        respuesta = respuesta,
+                        categoria = categoria,
+                        estado = estado
+                    )
+                    dao.actualizar(flashcardEditada)
+                } else {
+                    val nuevaFlashcard = Flashcard(
+                        pregunta = pregunta,
+                        respuesta = respuesta,
+                        categoria = categoria,
+                        estado = estado
+                    )
+                    dao.insertar(nuevaFlashcard)
+                }
+
                 runOnUiThread {
                     Toast.makeText(this@FlashcardFormularioActivity, "Flashcard guardada", Toast.LENGTH_SHORT).show()
                     finish()
                 }
             }
+        }
+
+        //Botón volver
+        findViewById<FloatingActionButton>(R.id.volver_atras).setOnClickListener {
+            val destino = if (btnGuardar.text == "Actualizar") FlashcardsActivity::class.java else FlashcardsActivity::class.java
+            startActivity(Intent(this, destino))
+        }
+
+        //Botón info
+        findViewById<FloatingActionButton>(R.id.boton_info).setOnClickListener {
+            AlertDialog.Builder(this)
+                .setTitle("Información")
+                .setMessage(Html.fromHtml(getString(R.string.info_kakebo), Html.FROM_HTML_MODE_LEGACY))
+                .setPositiveButton("Aceptar") { dialog, _ -> dialog.dismiss() }
+                .show()
         }
     }
 }

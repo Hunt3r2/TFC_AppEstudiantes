@@ -35,11 +35,30 @@ class FlashcardsActivity : AppCompatActivity() {
         spinnerCategoria = findViewById(R.id.spinnerCategoriaFlashcard)
         spinnerEstado = findViewById(R.id.spinnerEstadoFlashcard)
 
-        adapter = FlashcardFlipAdapter(onEditClick = { flashcard ->
-            val intent = Intent(this, FlashcardFormularioActivity::class.java)
-            intent.putExtra("flashcard_id", flashcard.id)
-            startActivity(intent)
-        })
+
+        adapter = FlashcardFlipAdapter(
+            onEditClick = { flashcard ->
+                val intent = Intent(this, FlashcardFormularioActivity::class.java)
+                intent.putExtra("flashcard_id", flashcard.id)
+                startActivity(intent)
+
+            },
+            onDeleteClick = { flashcard ->
+                AlertDialog.Builder(this)
+                    .setTitle("Eliminar flashcard")
+                    .setMessage("¿Estás seguro de que quieres eliminar esta flashcard?")
+                    .setPositiveButton("Sí") { _, _ ->
+                        lifecycleScope.launch {
+                            val dao = AppBD.getDatabase(this@FlashcardsActivity).flashcardDao()
+                            dao.eliminar(flashcard)
+                            cargarFlashcards()
+                            cargarSpinners()
+                        }
+                    }
+                    .setNegativeButton("No", null)
+                    .show()
+            }
+        )
 
         recyclerFlashcards.layoutManager = LinearLayoutManager(this)
         recyclerFlashcards.itemAnimator = DefaultItemAnimator()
@@ -73,6 +92,7 @@ class FlashcardsActivity : AppCompatActivity() {
             builder.setPositiveButton("Aceptar") { dialog, _ -> dialog.dismiss() }
             builder.create().show()
         }
+
     }
 
     private fun cargarSpinners() {
@@ -127,4 +147,5 @@ class FlashcardsActivity : AppCompatActivity() {
             adapter.setFlashcards(flashcards)
         }
     }
+
 }

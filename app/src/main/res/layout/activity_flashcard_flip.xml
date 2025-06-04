@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -9,33 +8,69 @@
         android:id="@+id/card_front"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#99AAAAAA"
-        android:elevation="4dp"
+        android:elevation="6dp"
         android:padding="16dp"
-        android:visibility="visible"
-        app:cardBackgroundColor="#54888484">
+        app:cardBackgroundColor="#FFEEEEEE"
+        app:cardCornerRadius="12dp"
+        android:visibility="visible">
 
-        <TextView
-            android:id="@+id/tv_front_text"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:gravity="center"
-            android:text="Pregunta"
-            android:textColor="@android:color/black"
-            android:textSize="18sp" />
-    </androidx.cardview.widget.CardView>
+            android:orientation="vertical">
 
+            <TextView
+                android:id="@+id/tv_front_text"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="Pregunta"
+                android:textColor="#212121"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp"
+                android:weightSum="2">
+
+                <Button
+                    android:id="@+id/btnEditar"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="Editar"
+                    android:backgroundTint="#2196F3"
+                    android:textColor="#FFFFFF"
+                    android:layout_marginEnd="8dp" />
+
+                <Button
+                    android:id="@+id/btnBorrar"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="Borrar"
+                    android:backgroundTint="#F44336"
+                    android:textColor="#FFFFFF"
+                    android:layout_marginStart="8dp" />
+
+            </LinearLayout>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
 
     <androidx.cardview.widget.CardView
         android:id="@+id/card_back"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@android:color/background_dark"
-        android:elevation="4dp"
+        android:elevation="6dp"
         android:padding="16dp"
-        android:visibility="gone"
-        app:cardBackgroundColor="#54888484">
-
+        app:cardBackgroundColor="#FFDDDDDD"
+        app:cardCornerRadius="12dp"
+        android:visibility="gone">
 
         <TextView
             android:id="@+id/tv_back_text"
@@ -43,8 +78,10 @@
             android:layout_height="match_parent"
             android:gravity="center"
             android:text="Respuesta"
-            android:textColor="@android:color/black"
-            android:textSize="18sp" />
+            android:textColor="#212121"
+            android:textSize="18sp"
+            android:textStyle="italic" />
+
     </androidx.cardview.widget.CardView>
 
 </FrameLayout>

@@ -17,4 +17,7 @@ interface FlashcardsDao {
     @Query("SELECT * FROM flashcards")
     suspend fun obtenerTodas(): List<Flashcard>
 
+    @Query("SELECT * FROM flashcards WHERE id = :id LIMIT 1")
+    suspend fun obtenerPorId(id: Int): Flashcard?
+
 }
