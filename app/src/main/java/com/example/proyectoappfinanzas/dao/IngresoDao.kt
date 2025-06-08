@@ -1,4 +1,4 @@
-package com.example.proyectoappfinanzas.database
+package com.example.proyectoappfinanzas.dao
 
 import androidx.room.Dao
 import androidx.room.Insert

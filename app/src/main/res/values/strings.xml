@@ -35,4 +35,53 @@
         <b>Establecimiento de Metas:</b><br/>
         Con base en tu análisis mensual, establece metas para el próximo mes. Esto puede incluir aumentar tu ahorro, reducir gastos en ciertas categorías, o incluso planificar para un gasto grande que se avecina.
     ]]></string>
+
+    <string name="info_pomodoro"><![CDATA[
+        <b>¿Qué es el método Pomodoro?</b><br/>
+        El método Pomodoro es una técnica de gestión del tiempo que consiste en trabajar en intervalos de tiempo llamados "pomodoros", separados por breves descansos.<br/><br/>
+
+        <b>¿Cómo funciona?</b><br/>
+        - Establece una tarea que deseas completar.<br/>
+        - Configura el temporizador para 25 minutos (un pomodoro).<br/>
+        - Trabaja sin interrupciones hasta que suene el temporizador.<br/>
+        - Toma un descanso corto de 5 minutos.<br/>
+        - Cada 4 pomodoros, toma un descanso largo (15-30 minutos).<br/><br/>
+
+        <b>Ventajas:</b><br/>
+        - Mejora la concentración.<br/>
+        - Reduce la fatiga mental.<br/>
+        - Te ayuda a mantenerte motivado.<br/><br/>
+
+        <b>Consejo:</b><br/>
+        Usa este apartado para crear configuraciones personalizadas de pomodoro, guardar sesiones y medir tu progreso.
+    ]]></string>
+
+    <string name="info_flashcards"><![CDATA[
+        <b>¿Qué son las flashcards?</b><br/>
+        Las flashcards (tarjetas de memoria) son una herramienta de estudio que consiste en una tarjeta con una pregunta en un lado y la respuesta en el otro.<br/><br/>
+
+        <b>¿Cómo usarlas?</b><br/>
+        - Crea tarjetas con preguntas sobre los temas que deseas aprender.<br/>
+        - Intenta responderlas antes de ver la solución.<br/>
+        - Marca el estado de cada flashcard según tu progreso (por ejemplo, "Aprendiendo", "Revisado").<br/><br/>
+
+        <b>Categorías y estados:</b><br/>
+        Puedes clasificar tus flashcards por temas y estados para organizar tu estudio de forma más efectiva.<br/><br/>
+
+        <b>Consejo:</b><br/>
+        Aprovecha las opciones de filtrado para repasar solo las tarjetas que aún estás aprendiendo.
+    ]]></string>
+
+    <string name="info_notas"><![CDATA[
+        <b>¿Para qué sirve el apartado de Notas?</b><br/>
+        Aquí puedes registrar ideas rápidas, recordatorios, tareas pendientes o cualquier información útil que necesites.<br/><br/>
+
+        <b>Características:</b><br/>
+        - Añadir títulos y contenido a tus notas.<br/>
+        - Editar y eliminar notas existentes.<br/>
+        - Ordenarlas según la fecha de creación.<br/><br/>
+
+        <b>Consejo:</b><br/>
+        Usa este espacio como un diario personal o un lugar para capturar inspiración y reflexiones.
+    ]]></string>
 </resources>

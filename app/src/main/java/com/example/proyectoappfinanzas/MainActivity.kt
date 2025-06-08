@@ -22,20 +22,37 @@ class MainActivity : AppCompatActivity() {
 
         val botonPomodoro: Button = findViewById(R.id.boton_pomodoro)
 
-        // Configura el listener para el botón
         botonPomodoro.setOnClickListener {
-            // Crea un Intent para iniciar la nueva actividad
             val intent = Intent(this, PomodoroActivity::class.java)
-            startActivity(intent) // Inicia la nueva actividad
+            startActivity(intent)
         }
 
         val buttonKakebo: Button = findViewById(R.id.boton_kakebo)
 
-        // Configura el listener para el botón
         buttonKakebo.setOnClickListener {
-            // Crea un Intent para iniciar la nueva actividad
             val intent = Intent(this, KakeboActivity::class.java)
-            startActivity(intent) // Inicia la nueva actividad
+            startActivity(intent)
+        }
+
+        val buttonNotas: Button = findViewById(R.id.boton_notas)
+
+        buttonNotas.setOnClickListener {
+            val intent = Intent(this, NotasActivity::class.java)
+            startActivity(intent)
+        }
+
+        val buttonFlashcard: Button = findViewById(R.id.boton_flashcards)
+
+        buttonFlashcard.setOnClickListener {
+            val intent = Intent(this, FlashcardsActivity::class.java)
+            startActivity(intent)
+        }
+
+        val buttonSettings: Button = findViewById(R.id.boton_settings)
+
+        buttonSettings.setOnClickListener {
+            val intent = Intent(this, SettingsActivity::class.java)
+            startActivity(intent)
         }
     }
 }

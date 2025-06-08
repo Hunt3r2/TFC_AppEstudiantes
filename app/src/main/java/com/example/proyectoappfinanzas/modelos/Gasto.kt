@@ -10,5 +10,6 @@ data class Gasto(
     val descripcion: String,
     val categoria: String,
     val mes: Int,
-    val anio: Int
+    val anio: Int,
+    val dia: Int
 )
