@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">ProyectoAppFinanzas</string>
+    <string name="app_name">Aplicación para estudiantes</string>
     <string name="info_kakebo"><![CDATA[
         <b>¿Qué es Kakebo?</b><br/>
         Kakebo, que se traduce como "libro de cuentas del hogar", es un método que te ayuda a registrar y reflexionar sobre tus gastos e ingresos. La idea es que, al escribir tus transacciones, te vuelvas más consciente de tus hábitos de consumo y, por lo tanto, puedas gestionar mejor tu dinero.<br/><br/>
