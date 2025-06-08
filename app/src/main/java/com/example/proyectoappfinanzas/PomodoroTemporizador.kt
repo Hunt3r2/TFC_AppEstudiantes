@@ -29,20 +29,25 @@ class PomodoroTemporizador(
     private val sonidoActivado = preferencias.getBoolean("sonido", true)
     private val vibracionActivada = preferencias.getBoolean("vibracion", true)
 
+    //Inicia el temporizador desde el ciclo 0
     fun iniciar() {
         cicloActual = 0
         enTrabajo = true
         iniciarCiclo()
     }
 
+    //Controla el ciclo actual: trabajo o descanso (corto o largo)
     private fun iniciarCiclo() {
+        //Si ya se completaron todos los ciclos, finalizar
         if (cicloActual >= ciclos) {
             onFinish()
             notificar("Pomodoro terminado", "Todos los ciclos completados")
             return
         }
 
+        //Define duración según si es trabajo, descanso corto o largo
         val duracion = if (enTrabajo) tiempoTrabajo else if ((cicloActual + 1) % 4 == 0) tiempoPausaLarga else tiempoDescanso
+        // Si la duración es inválida, finaliza
         if (duracion <= 0) {
             notificar("Error de configuración", "Duración no puede ser cero o negativa")
             onFinish()
@@ -51,6 +56,7 @@ class PomodoroTemporizador(
 
         tiempoRestante = duracion * 60
 
+        //Lanza una corutina para contar el tiempo
         job = CoroutineScope(Dispatchers.Main).launch {
             while (tiempoRestante > 0 && !pausado) {
                 delay(1000L)
@@ -58,6 +64,7 @@ class PomodoroTemporizador(
                 onTick(tiempoRestante * 1000L)
             }
 
+            //Al finalizar el ciclo
             if (tiempoRestante == 0) {
                 notificar(
                     if (enTrabajo) "Trabajo terminado" else "Descanso terminado",
@@ -106,6 +113,7 @@ class PomodoroTemporizador(
         job?.cancel()
     }
 
+    //Muestra una notificación en el dispositivo
     private fun notificar(titulo: String, mensaje: String) {
         val channelId = "pomodoro_channel"
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -125,6 +133,7 @@ class PomodoroTemporizador(
         manager.notify(System.currentTimeMillis().toInt(), notificacion)
     }
 
+    //Vibra el dispositivo si está activado
     private fun vibrar() {
         if (!vibracionActivada) return
         val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator

@@ -17,6 +17,7 @@ import com.example.proyectoappfinanzas.modelos.Gasto
 import com.example.proyectoappfinanzas.modelos.Nota
 import com.example.proyectoappfinanzas.modelos.Pomodoro
 
+//Definición de la base de datos usando Room
 @Database(
     entities = [Ingreso::class, Gasto::class, Nota::class, Pomodoro::class, Flashcard::class],
     version = 3,
@@ -24,6 +25,8 @@ import com.example.proyectoappfinanzas.modelos.Pomodoro
 )
 @TypeConverters(Convertidores::class)
 abstract class AppBD : RoomDatabase() {
+
+    //Métodos abstractos para obtener los DAOs. Room se encargará de implementarlos.
     abstract fun ingresoDao(): IngresoDao
     abstract fun gastoDao(): GastoDao
     abstract fun notaDao(): NotaDao
@@ -35,12 +38,14 @@ abstract class AppBD : RoomDatabase() {
         @Volatile
         private var INSTANCE: AppBD? = null
 
+        //Método para obtener la instancia de la base de datos
         fun getDatabase(context: Context): AppBD {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppBD::class.java,
                     "GestorDB"
+                //Elimina y recrea la BD si hay cambio de versión sin migración
                 ).fallbackToDestructiveMigration().build()
                 INSTANCE = instance
                 instance

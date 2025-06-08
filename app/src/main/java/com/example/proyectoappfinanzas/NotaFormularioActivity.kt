@@ -17,6 +17,7 @@ class NotaFormularioActivity : AppCompatActivity() {
     private lateinit var btnGuardar: Button
     private lateinit var btnEliminar: Button
 
+    //ID de la nota que se va a editar (null si es una nueva)
     private var notaId: Int? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,6 +58,7 @@ class NotaFormularioActivity : AppCompatActivity() {
         val titulo = etTitulo.text.toString()
         val contenido = etContenido.text.toString()
 
+        //Validación de campos vacíos
         if (titulo.isBlank() || contenido.isBlank()) {
             Toast.makeText(this, "Completa todos los campos", Toast.LENGTH_SHORT).show()
             return

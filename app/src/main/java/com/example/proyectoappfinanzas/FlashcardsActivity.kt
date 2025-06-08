@@ -3,7 +3,6 @@ package com.example.proyectoappfinanzas
 import android.content.Intent
 import android.os.Bundle
 import android.text.Html
-import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -12,7 +11,6 @@ import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.proyectoappfinanzas.database.AppBD
-import com.example.proyectoappfinanzas.modelos.Flashcard
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.launch
 
@@ -29,13 +27,14 @@ class FlashcardsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_flashcards)
 
+        //Inicialización de vistas desde el layout
         recyclerFlashcards = findViewById(R.id.recyclerFlashcards)
         fabAddFlashcard = findViewById(R.id.btnAgregarFlashcard)
         btnFiltrarFlashcards = findViewById(R.id.btnFiltrar)
         spinnerCategoria = findViewById(R.id.spinnerCategoriaFlashcard)
         spinnerEstado = findViewById(R.id.spinnerEstadoFlashcard)
 
-
+        //Configuración del adaptador de la lista, con opciones para editar o eliminar flashcards
         adapter = FlashcardFlipAdapter(
             onEditClick = { flashcard ->
                 val intent = Intent(this, FlashcardFormularioActivity::class.java)
@@ -100,6 +99,7 @@ class FlashcardsActivity : AppCompatActivity() {
             val dao = AppBD.getDatabase(this@FlashcardsActivity).flashcardDao()
             val flashcards = dao.obtenerTodas()
 
+            //Obtiene valores únicos y no vacíos
             val categorias = flashcards.map { it.categoria }.distinct().filter { it.isNotBlank() }.toMutableList()
             val estados = flashcards.map { it.estado }.distinct().filter { it.isNotBlank() }.toMutableList()
 
@@ -135,6 +135,7 @@ class FlashcardsActivity : AppCompatActivity() {
         }
     }
 
+    //Al volver a la actividad por ejemplo, después de editar, recarga la lista y los filtros
     override fun onResume() {
         super.onResume()
         cargarFlashcards()

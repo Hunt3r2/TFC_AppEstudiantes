@@ -94,6 +94,7 @@ class PomodoroActivity : AppCompatActivity() {
             detenerTemporizador()
         }
 
+        //Cargar datos en campos al seleccionar una configuración del spinner
         spinnerPomodoros.setOnItemSelectedListener(object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
                 if (position in listaPomodoros.indices) {
@@ -173,6 +174,7 @@ class PomodoroActivity : AppCompatActivity() {
             tiempoPausaLarga = p.tiempo_pausa_larga,
             ciclos = p.repetir_pomodoro,
             onTick = { millis ->
+                //Actualiza el TextView con el tiempo restante
                 handler.post {
                     val min = (millis / 1000) / 60
                     val sec = (millis / 1000) % 60
@@ -180,6 +182,7 @@ class PomodoroActivity : AppCompatActivity() {
                 }
             },
             onFinish = {
+                //Al finalizar el ciclo completo
                 handler.post {
                     Toast.makeText(this, "Pomodoro completado", Toast.LENGTH_SHORT).show()
                     tvTemporizador.text = "00:00"

@@ -48,6 +48,7 @@ class FlashcardFlipAdapter(
 
         private fun flipCard() {
             val scale = itemView.context.resources.displayMetrics.density
+            //Ajuste de distancia de cámara para efecto 3D más realista
             cardFront.cameraDistance = 8000 * scale
             cardBack.cameraDistance = 8000 * scale
 
@@ -68,6 +69,7 @@ class FlashcardFlipAdapter(
 
                 frontOut.start()
             } else {
+                //Si está mostrando el reverso, girar hacia adelante
                 val backOut = ObjectAnimator.ofFloat(cardBack, "rotationY", 0f, 90f)
                 val frontIn = ObjectAnimator.ofFloat(cardFront, "rotationY", -90f, 0f)
 
@@ -82,6 +84,7 @@ class FlashcardFlipAdapter(
                     }
                 })
 
+                //Cambia el estado de la tarjeta
                 backOut.start()
             }
             isFlipped = !isFlipped
@@ -110,6 +113,7 @@ class FlashcardFlipAdapter(
         }
     }
 
+    //Devuelve el número total de flashcards
     override fun getItemCount(): Int = flashcards.size
 
     fun setFlashcards(nuevos: List<Flashcard>) {
